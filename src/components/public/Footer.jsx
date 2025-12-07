@@ -34,32 +34,32 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-base-300 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
+    <footer className="bg-base-300/50 relative overflow-hidden">
+      {/* Premium Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-primary/10 rounded-full mesh-blob"></div>
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/10 rounded-full mesh-blob"></div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 relative z-10">
+      <div className="container mx-auto px-4 py-16 relative z-10">
         {/* Main Footer Content */}
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-2xl font-bold text-primary">
-              <Code2 className="w-8 h-8" />
+          <div className="md:col-span-2 space-y-6">
+            <div className="flex items-center space-x-2 text-3xl font-bold gradient-text">
+              <Code2 className="w-10 h-10 text-primary" />
               <span>DevPortfolio</span>
             </div>
-            <p className="text-base-content/70 leading-relaxed">
+            <p className="text-base-content/70 leading-relaxed text-lg max-w-md">
               {profile?.bio || 'Passionate web developer creating amazing digital experiences with modern technologies.'}
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               {profile?.github_url && (
                 <a 
                   href={profile.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-circle btn-ghost btn-sm hover:btn-primary group"
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
                   <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </a>
@@ -69,7 +69,7 @@ const Footer = () => {
                   href={profile.linkedin_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-circle btn-ghost btn-sm hover:btn-secondary group"
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
                   <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </a>
@@ -79,7 +79,7 @@ const Footer = () => {
                   href={profile.twitter_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-circle btn-ghost btn-sm hover:btn-accent group"
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
                   <Twitter className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </a>
@@ -87,7 +87,7 @@ const Footer = () => {
               {profile?.email && (
                 <a 
                   href={`mailto:${profile.email}`}
-                  className="btn btn-circle btn-ghost btn-sm hover:btn-primary group"
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
                   <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </a>
@@ -96,9 +96,9 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-base-content">Quick Links</h3>
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-base-content">Navigation</h3>
+            <div className="space-y-3">
               {[
                 { name: 'Home', href: '#home' },
                 { name: 'About', href: '#about' },
@@ -111,7 +111,7 @@ const Footer = () => {
                   onClick={() => {
                     document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="block text-base-content/70 hover:text-primary transition-colors"
+                  className="block text-base-content/70 hover:text-primary transition-colors text-lg hover:translate-x-2 transition-transform"
                 >
                   {link.name}
                 </button>
@@ -120,16 +120,15 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-base-content">Get In Touch</h3>
-            <div className="space-y-2 text-base-content/70">
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-base-content">Contact</h3>
+            <div className="space-y-4 text-base-content/70">
               {profile?.email && (
                 <div>
-                  <strong>Email:</strong>
-                  <br />
+                  <div className="text-sm text-base-content/50 mb-1">Email</div>
                   <a 
                     href={`mailto:${profile.email}`}
-                    className="hover:text-primary transition-colors"
+                    className="hover:text-primary transition-colors text-base break-all"
                   >
                     {profile.email}
                   </a>
@@ -137,11 +136,10 @@ const Footer = () => {
               )}
               {profile?.phone && (
                 <div>
-                  <strong>Phone:</strong>
-                  <br />
+                  <div className="text-sm text-base-content/50 mb-1">Phone</div>
                   <a 
                     href={`tel:${profile.phone}`}
-                    className="hover:text-primary transition-colors"
+                    className="hover:text-primary transition-colors text-base"
                   >
                     {profile.phone}
                   </a>
@@ -149,9 +147,8 @@ const Footer = () => {
               )}
               {profile?.location && (
                 <div>
-                  <strong>Location:</strong>
-                  <br />
-                  {profile.location}
+                  <div className="text-sm text-base-content/50 mb-1">Location</div>
+                  <div className="text-base">{profile.location}</div>
                 </div>
               )}
             </div>
@@ -159,18 +156,19 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className="divider"></div>
+        <div className="h-px bg-gradient-to-r from-transparent via-base-content/20 to-transparent my-8"></div>
 
         {/* Bottom Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-2 text-base-content/70">
-            <span>© {currentYear} {profile?.full_name || 'DevPortfolio'}. Made with</span>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2 text-base-content/70">
+            <span>© {currentYear} {profile?.full_name || 'DevPortfolio'}.</span>
+            <span className="hidden md:inline">Made with</span>
             <Heart className="w-4 h-4 text-red-500 animate-pulse" />
-            <span>using React & Tailwind CSS</span>
+            <span className="hidden md:inline">using React & Tailwind CSS</span>
           </div>
 
           <div className="text-sm text-base-content/50">
-            Built with modern web technologies
+            Designed & Built with passion
           </div>
         </div>
       </div>
@@ -179,7 +177,7 @@ const Footer = () => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 btn btn-primary btn-circle shadow-lg z-40 animate-bounce-in"
+          className="fixed bottom-8 right-8 btn btn-gradient btn-circle shadow-2xl z-40 animate-bounce-in hover:scale-110 transition-transform"
         >
           <ArrowUp className="w-5 h-5" />
         </button>

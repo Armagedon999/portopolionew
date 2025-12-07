@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Code, Palette, Server, Database, Cloud, PenTool as Tool } from 'lucide-react';
+import { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { Code, Palette, Server, Database, Cloud, PenTool as Tool, Sparkles } from 'lucide-react';
+import { motion, useMotionValue, animate } from 'framer-motion';
 import { db } from '../../lib/supabase';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
@@ -41,14 +42,146 @@ const Skills = () => {
     }
   };
 
-  const groupedSkills = skills.reduce((acc, skill) => {
-    const category = skill.category || 'Other';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(skill);
-    return acc;
-  }, {});
+  const groupedSkills = useMemo(() => {
+    return skills.reduce((acc, skill) => {
+      const category = skill.category || 'Other';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(skill);
+      return acc;
+    }, {});
+  }, [skills]);
+
+  // Skill Card Component untuk Marquee - Optimized with memo
+  const SkillCard = memo(({ skill }) => {
+    return (
+      <motion.div
+        className="relative group cursor-pointer flex-shrink-0"
+        whileHover={{ scale: 1.03 }}
+        transition={{ duration: 0.2 }}
+      >
+        <div className="relative">
+          {/* Main card - No shadow, reduced blur */}
+          <div className="relative glass-card rounded-xl p-4 backdrop-blur-sm border border-white/10 group-hover:border-white/20 transition-all duration-200 w-[140px] sm:w-[160px] shadow-none">
+            {/* Animated background gradient */}
+            <div 
+              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"
+              style={{ 
+                background: `linear-gradient(135deg, ${skill.color || '#3B82F6'}, ${skill.color || '#8B5CF6'})` 
+              }}
+            />
+            
+            <div className="relative z-10">
+              {/* Icon */}
+              <div className="flex items-center justify-center mb-2">
+                {skill.icon_url ? (
+                  <div className="relative">
+                    <img 
+                      src={skill.icon_url} 
+                      alt={skill.name}
+                      className="w-10 h-10 object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ) : (
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-base relative overflow-hidden"
+                    style={{ backgroundColor: skill.color || '#3B82F6' }}
+                  >
+                    <span className="relative z-10">{skill.name.charAt(0)}</span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                  </div>
+                )}
+              </div>
+
+              {/* Skill name */}
+              <h3 className="text-center font-semibold text-xs text-base-content group-hover:text-primary transition-colors">
+                {skill.name}
+              </h3>
+
+              {/* Featured badge */}
+              {skill.is_featured && (
+                <div className="flex justify-center mt-1.5">
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-semibold">
+                    <Sparkles className="w-2 h-2" />
+                    <span>Featured</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  });
+
+  // Marquee Row Component - Infinite Scrolling - Optimized
+  const MarqueeRow = memo(({ category, categorySkills, direction = 'left', speed = 20 }) => {
+    // Duplicate skills untuk seamless loop (2 set untuk infinite scroll)
+    const duplicatedSkills = useMemo(() => [...categorySkills, ...categorySkills], [categorySkills]);
+    const containerRef = useRef(null);
+    const x = useMotionValue(0);
+
+    useEffect(() => {
+      if (!containerRef.current) return;
+
+      const container = containerRef.current;
+      const containerWidth = container.scrollWidth / 2; // Width of one set
+
+      // Set initial position
+      x.set(direction === 'right' ? -containerWidth : 0);
+
+      const controls = animate(
+        x,
+        direction === 'left' ? -containerWidth : 0,
+        {
+          duration: speed,
+          repeat: Infinity,
+          ease: 'linear',
+          repeatType: 'loop',
+        }
+      );
+
+      return () => controls.stop();
+    }, [direction, speed, x]);
+
+    return (
+      <div className="relative mb-8 overflow-hidden">
+        {/* Category Header */}
+        <div className="flex items-center gap-4 mb-6 px-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-lg flex items-center justify-center">
+              {getCategoryIcon(category)}
+            </div>
+            <h3 className="text-xl font-bold text-base-content">{category}</h3>
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent" />
+          <span className="text-xs text-base-content/60 font-semibold">
+            {categorySkills.length} {categorySkills.length === 1 ? 'skill' : 'skills'}
+          </span>
+        </div>
+
+        {/* Gradient overlays untuk fade effect */}
+        <div className="absolute left-0 top-16 bottom-0 w-32 bg-gradient-to-r from-base-100 via-base-100/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-16 bottom-0 w-32 bg-gradient-to-l from-base-100 via-base-100/80 to-transparent z-10 pointer-events-none" />
+
+        {/* Marquee Container */}
+        <div className="overflow-hidden">
+          <motion.div
+            ref={containerRef}
+            className="flex gap-2"
+            style={{ x }}
+          >
+            {duplicatedSkills.map((skill, index) => (
+              <SkillCard key={`${skill.id}-${index}`} skill={skill} />
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    );
+  });
 
   if (loading) {
     return (
@@ -66,125 +199,67 @@ const Skills = () => {
     <section 
       id="skills" 
       ref={elementRef}
-      className="py-20 bg-base-200/50 relative overflow-hidden"
+      className="section-padding bg-base-100 relative overflow-hidden"
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-l from-secondary/20 to-transparent"></div>
+      {/* Simplified Background - Reduced animations for performance */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full mesh-blob" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full mesh-blob" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className={`text-center mb-16 transition-all duration-1000 ${
-          hasIntersected ? 'animate-fade-in' : 'opacity-0'
-        }`}>
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent mb-4">
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-heading gradient-text mb-4">
             Skills & Technologies
           </h2>
-          <p className="text-xl text-base-content/70 max-w-2xl mx-auto">
-            Here are the technologies and tools I work with to bring ideas to life
+          <p className="text-body-lg text-base-content/70 max-w-2xl mx-auto">
+            A collection of tools and technologies I work with
           </p>
-        </div>
+        </motion.div>
 
+        {/* Skills by Category - Marquee Rows */}
         <div className="space-y-12">
           {Object.entries(groupedSkills).map(([category, categorySkills], categoryIndex) => (
-            <div 
+            <motion.div
               key={category}
-              className={`transition-all duration-1000 ${
-                hasIntersected 
-                  ? 'animate-slide-up' 
-                  : 'opacity-0 translate-y-8'
-              }`}
-              style={{ transitionDelay: `${categoryIndex * 200 + 200}ms` }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
             >
-              {/* Category Header */}
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                  {getCategoryIcon(category)}
-                </div>
-                <h3 className="text-2xl font-bold text-base-content">{category}</h3>
-              </div>
-
-              {/* Skills Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categorySkills.map((skill, skillIndex) => (
-                  <div
-                    key={skill.id}
-                    className={`bg-base-100 rounded-xl p-6 shadow-lg border border-base-300/20 hover:shadow-xl hover:scale-105 transition-all duration-300 group ${
-                      hasIntersected 
-                        ? 'animate-scale-in' 
-                        : 'opacity-0 scale-90'
-                    }`}
-                    style={{ 
-                      transitionDelay: `${categoryIndex * 200 + skillIndex * 100 + 300}ms` 
-                    }}
-                  >
-                    {/* Skill Header */}
-                    <div className="flex items-center space-x-3 mb-4">
-                      {skill.icon_url ? (
-                        <img 
-                          src={skill.icon_url} 
-                          alt={skill.name}
-                          className="w-10 h-10"
-                        />
-                      ) : (
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                          style={{ backgroundColor: skill.color || '#3B82F6' }}
-                        >
-                          {skill.name.charAt(0)}
-                        </div>
-                      )}
-                      <h4 className="font-bold text-lg text-base-content group-hover:text-primary transition-colors">
-                        {skill.name}
-                      </h4>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-base-content/70">Proficiency</span>
-                        <span className="font-semibold text-primary">{skill.level}%</span>
-                      </div>
-                      <div className="w-full bg-base-300 rounded-full h-2">
-                        <div 
-                          className="h-2 rounded-full transition-all duration-1000 ease-out"
-                          style={{ 
-                            backgroundColor: skill.color || '#3B82F6',
-                            width: hasIntersected ? `${skill.level}%` : '0%',
-                            transitionDelay: `${categoryIndex * 200 + skillIndex * 100 + 500}ms`
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Skill Badge */}
-                    {skill.is_featured && (
-                      <div className="mt-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
-                          Featured
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+              <MarqueeRow 
+                category={category}
+                categorySkills={categorySkills}
+                direction={categoryIndex % 2 === 0 ? 'left' : 'right'}
+                speed={15 + (categoryIndex % 3) * 5}
+              />
+            </motion.div>
           ))}
         </div>
 
-        {/* Skills Summary */}
+        {/* Summary Stats */}
         {skills.length > 0 && (
-          <div className={`text-center mt-16 transition-all duration-1000 delay-1000 ${
-            hasIntersected ? 'animate-fade-in' : 'opacity-0'
-          }`}>
-            <div className="stats stats-vertical lg:stats-horizontal shadow-xl bg-base-100 border border-base-300/20">
+          <motion.div 
+            className="text-center mt-16"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="stats stats-vertical lg:stats-horizontal glass-card">
               <div className="stat">
                 <div className="stat-figure text-primary">
                   <Code className="w-8 h-8" />
                 </div>
                 <div className="stat-title">Technologies</div>
                 <div className="stat-value text-primary">{skills.length}</div>
-                <div className="stat-desc">Different tools mastered</div>
+                <div className="stat-desc">Tools & frameworks</div>
               </div>
 
               <div className="stat">
@@ -193,21 +268,21 @@ const Skills = () => {
                 </div>
                 <div className="stat-title">Categories</div>
                 <div className="stat-value text-secondary">{Object.keys(groupedSkills).length}</div>
-                <div className="stat-desc">Skill categories</div>
+                <div className="stat-desc">Skill domains</div>
               </div>
 
               <div className="stat">
                 <div className="stat-figure text-accent">
-                  <Tool className="w-8 h-8" />
+                  <Sparkles className="w-8 h-8" />
                 </div>
-                <div className="stat-title">Average Level</div>
+                <div className="stat-title">Featured</div>
                 <div className="stat-value text-accent">
-                  {Math.round(skills.reduce((sum, skill) => sum + skill.level, 0) / skills.length)}%
+                  {skills.filter(s => s.is_featured).length}
                 </div>
-                <div className="stat-desc">Skill proficiency</div>
+                <div className="stat-desc">Top skills</div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </section>

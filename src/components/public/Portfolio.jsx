@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink, Github, Eye, Code, Filter, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { db } from '../../lib/supabase';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
@@ -84,40 +85,161 @@ const Portfolio = () => {
     <section 
       id="portfolio" 
       ref={elementRef}
-      className="py-20 bg-base-100 relative overflow-hidden"
+      className="section-padding bg-base-100 relative overflow-hidden"
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-accent/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+      {/* Premium Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full mesh-blob"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full mesh-blob"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className={`text-center mb-16 transition-all duration-1000 ${
           hasIntersected ? 'animate-fade-in' : 'opacity-0'
         }`}>
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent mb-4">
+          <h2 className="text-heading gradient-text mb-4">
             Featured Work
           </h2>
-          <p className="text-xl text-base-content/70 max-w-2xl mx-auto">
+          <p className="text-body-lg text-base-content/70 max-w-2xl mx-auto">
             Here are some of my recent projects that showcase my skills and experience
           </p>
         </div>
 
+        {/* Featured Projects Showcase */}
+        {projects.filter(p => p.is_featured).length > 0 && (
+          <motion.div
+            className="mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+          >
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold gradient-text mb-2">⭐ Featured Projects</h3>
+              <p className="text-base-content/70">Showcasing my best work</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+              {projects.filter(p => p.is_featured).slice(0, 3).map((project, index) => (
+                <motion.div
+                  key={`featured-${project.id}`}
+                  className="group glass-card rounded-3xl shadow-2xl overflow-hidden hover-lift border-2 border-primary/20"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  onClick={() => setSelectedProject(project)}
+                >
+                  {/* Project Image */}
+                  <div className="relative overflow-hidden aspect-[4/3]">
+                    {project.image_url ? (
+                      <img
+                        src={project.image_url}
+                        alt={project.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <Code className="w-16 h-16 text-primary/50" />
+                      </div>
+                    )}
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500"></div>
+
+                    {/* Featured Badge */}
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full shadow-lg">⭐ Featured</span>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <button
+                        className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform opacity-90 hover:opacity-100"
+                        title="View Details"
+                      >
+                        <Eye className="w-5 h-5 text-white" />
+                      </button>
+
+                      {project.demo_url && (
+                        <a
+                          href={project.demo_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform opacity-90 hover:opacity-100"
+                          title="Live Demo"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink className="w-5 h-5 text-white" />
+                        </a>
+                      )}
+
+                      {project.repo_url && (
+                        <a
+                          href={project.repo_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform opacity-90 hover:opacity-100"
+                          title="View Code"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Github className="w-5 h-5 text-white" />
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Project Info Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                      <h4 className="text-xl font-bold mb-2 line-clamp-1">
+                        {project.title}
+                      </h4>
+                      <p className="text-white/90 text-sm mb-3 line-clamp-2">
+                        {project.short_description || project.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {project.tech_stack?.slice(0, 3).map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-2 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-xs font-medium"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Filter Tabs */}
-        <div className={`flex flex-wrap justify-center gap-2 mb-12 transition-all duration-1000 delay-200 ${
-          hasIntersected ? 'animate-slide-up' : 'opacity-0 translate-y-8'
-        }`}>
+        <motion.div
+          className="flex flex-wrap justify-center gap-3 mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <button
             onClick={() => setFilter('all')}
-            className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+            className={`px-6 py-3 rounded-xl font-medium transition-all ${
+              filter === 'all'
+                ? 'btn-gradient text-white shadow-lg'
+                : 'glass-card hover-lift'
+            }`}
           >
-            <Filter className="w-4 h-4 mr-2" />
+            <Filter className="w-4 h-4 mr-2 inline" />
             All Projects
           </button>
           <button
             onClick={() => setFilter('featured')}
-            className={`btn btn-sm ${filter === 'featured' ? 'btn-primary' : 'btn-ghost'}`}
+            className={`px-6 py-3 rounded-xl font-medium transition-all ${
+              filter === 'featured'
+                ? 'btn-gradient text-white shadow-lg'
+                : 'glass-card hover-lift'
+            }`}
           >
             Featured
           </button>
@@ -125,37 +247,48 @@ const Portfolio = () => {
             <button
               key={tech}
               onClick={() => setFilter(tech)}
-              className={`btn btn-sm ${filter === tech ? 'btn-primary' : 'btn-ghost'}`}
+              className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                filter === tech
+                  ? 'btn-gradient text-white shadow-lg'
+                  : 'glass-card hover-lift'
+              }`}
             >
               {tech}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Projects Grid */}
+        {/* Projects Masonry Grid */}
         {filteredProjects.length === 0 ? (
-          <div className="text-center py-12">
+          <motion.div 
+            className="text-center py-12"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
             <p className="text-lg text-base-content/50">No projects found for the selected filter.</p>
-          </div>
+          </motion.div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {filteredProjects.map((project, index) => (
-              <div
+              <motion.div
                 key={project.id}
-                className={`group bg-base-100 rounded-2xl shadow-xl border border-base-300/20 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${
-                  hasIntersected 
-                    ? 'animate-scale-in' 
-                    : 'opacity-0 scale-90'
-                }`}
-                style={{ transitionDelay: `${index * 100 + 300}ms` }}
+                className="group glass-card rounded-3xl shadow-xl overflow-hidden hover-lift"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                style={{ 
+                  gridRow: index % 3 === 0 ? 'span 2' : 'span 1'
+                }}
               >
                 {/* Project Image */}
-                <div className="relative overflow-hidden h-48">
+                <div className="relative overflow-hidden" style={{ height: index % 3 === 0 ? '400px' : '250px' }}>
                   {project.image_url ? (
                     <img 
                       src={project.image_url} 
                       alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -163,14 +296,17 @@ const Portfolio = () => {
                     </div>
                   )}
                   
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500"></div>
+                  
+                  {/* Action Buttons */}
+                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                       onClick={() => setSelectedProject(project)}
-                      className="btn btn-circle btn-primary btn-sm"
+                      className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform"
                       title="View Details"
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className="w-5 h-5 text-white" />
                     </button>
                     
                     {project.demo_url && (
@@ -178,10 +314,10 @@ const Portfolio = () => {
                         href={project.demo_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-circle btn-secondary btn-sm"
+                        className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform"
                         title="Live Demo"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-5 h-5 text-white" />
                       </a>
                     )}
                     
@@ -190,97 +326,64 @@ const Portfolio = () => {
                         href={project.repo_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-circle btn-accent btn-sm"
+                        className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform"
                         title="View Code"
                       >
-                        <Github className="w-4 h-4" />
+                        <Github className="w-5 h-5 text-white" />
                       </a>
                     )}
                   </div>
 
                   {/* Featured Badge */}
                   {project.is_featured && (
-                    <div className="absolute top-4 right-4">
-                      <span className="badge badge-primary badge-sm">Featured</span>
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 bg-primary/90 text-white text-xs font-semibold rounded-full">Featured</span>
                     </div>
                   )}
-                </div>
-
-                {/* Project Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-base-content mb-2 group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h3>
                   
-                  <p className="text-base-content/70 mb-4 line-clamp-2">
-                    {project.short_description || project.description}
-                  </p>
-
-                  {/* Tech Stack */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tech_stack?.slice(0, 4).map((tech) => (
-                      <span
-                        key={tech}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: `${getTechColor(tech)}20`,
-                          color: getTechColor(tech),
-                        }}
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                    {project.tech_stack?.length > 4 && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-base-300 text-base-content">
-                        +{project.tech_stack.length - 4}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Action Links */}
-                  <div className="flex space-x-2">
-                    {project.demo_url && (
-                      <a
-                        href={project.demo_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-primary btn-sm flex-1"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Demo
-                      </a>
-                    )}
-                    
-                    {project.repo_url && (
-                      <a
-                        href={project.repo_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-outline btn-sm flex-1"
-                      >
-                        <Github className="w-4 h-4 mr-2" />
-                        Code
-                      </a>
-                    )}
+                  {/* Project Info Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3 className="text-xl font-bold mb-2">
+                      {project.title}
+                    </h3>
+                    <p className="text-white/80 text-sm mb-3 line-clamp-2">
+                      {project.short_description || project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech_stack?.slice(0, 3).map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-2 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-xs font-medium"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                      {project.tech_stack?.length > 3 && (
+                        <span className="px-2 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-xs font-medium">
+                          +{project.tech_stack.length - 3}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+
+              </motion.div>
             ))}
           </div>
         )}
 
         {/* Project Modal */}
         {selectedProject && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-base-100 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="glass-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in shadow-2xl dark:bg-base-200/95 dark:backdrop-blur-xl">
               {/* Modal Header */}
-              <div className="sticky top-0 bg-base-100 border-b border-base-300/20 p-6 flex justify-between items-center">
+              <div className="sticky top-0 glass-card border-b border-base-300/20 p-6 flex justify-between items-center dark:border-base-100/10">
                 <h3 className="text-2xl font-bold text-base-content">
                   {selectedProject.title}
                 </h3>
                 <button
                   onClick={() => setSelectedProject(null)}
-                  className="btn btn-circle btn-ghost"
+                  className="btn btn-circle btn-ghost hover:bg-base-200 dark:hover:bg-base-100/10"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -291,29 +394,29 @@ const Portfolio = () => {
                 {/* Project Image */}
                 {selectedProject.image_url && (
                   <div className="mb-6">
-                    <img 
-                      src={selectedProject.image_url} 
+                    <img
+                      src={selectedProject.image_url}
                       alt={selectedProject.title}
-                      className="w-full h-64 object-cover rounded-xl"
+                      className="w-full h-64 object-cover rounded-xl shadow-lg"
                     />
                   </div>
                 )}
 
                 {/* Project Description */}
                 <div className="mb-6">
-                  <p className="text-base-content/80 text-lg leading-relaxed">
+                  <p className="text-base-content/80 text-lg leading-relaxed dark:text-base-content/90">
                     {selectedProject.description}
                   </p>
                 </div>
 
                 {/* Tech Stack */}
                 <div className="mb-6">
-                  <h4 className="text-lg font-semibold mb-3">Technologies Used</h4>
+                  <h4 className="text-lg font-semibold mb-3 text-base-content dark:text-base-content">Technologies Used</h4>
                   <div className="flex flex-wrap gap-3">
                     {selectedProject.tech_stack?.map((tech) => (
                       <span
                         key={tech}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-sm"
                         style={{
                           backgroundColor: `${getTechColor(tech)}20`,
                           color: getTechColor(tech),
@@ -332,19 +435,19 @@ const Portfolio = () => {
                       href={selectedProject.demo_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-primary btn-lg flex-1"
+                      className="btn btn-primary btn-lg flex-1 shadow-lg hover:shadow-xl dark:shadow-primary/25"
                     >
                       <ExternalLink className="w-5 h-5 mr-2" />
                       View Live Demo
                     </a>
                   )}
-                  
+
                   {selectedProject.repo_url && (
                     <a
                       href={selectedProject.repo_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-outline btn-lg flex-1"
+                      className="btn btn-outline btn-lg flex-1 dark:border-base-100/30 dark:text-base-content dark:hover:bg-base-100/10"
                     >
                       <Github className="w-5 h-5 mr-2" />
                       View Source Code

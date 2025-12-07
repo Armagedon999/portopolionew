@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { db } from '../../lib/supabase';
@@ -75,31 +76,36 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={elementRef}
-      className="py-20 bg-base-200/50 relative overflow-hidden"
+      className="section-padding bg-base-200/30 relative overflow-hidden"
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-primary/20 to-transparent"></div>
+      {/* Premium Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full mesh-blob"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/10 rounded-full mesh-blob"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className={`text-center mb-16 transition-all duration-1000 ${
           hasIntersected ? 'animate-fade-in' : 'opacity-0'
         }`}>
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+          <h2 className="text-heading gradient-text mb-4">
             Get In Touch
           </h2>
-          <p className="text-xl text-base-content/70 max-w-2xl mx-auto">
+          <p className="text-body-lg text-base-content/70 max-w-2xl mx-auto">
             Ready to start your next project? Let's discuss how we can work together
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-5 gap-8 max-w-7xl mx-auto">
           {/* Contact Information */}
-          <div className={`transition-all duration-1000 delay-200 ${
-            hasIntersected ? 'animate-slide-up' : 'opacity-0 translate-y-8'
-          }`}>
-            <div className="bg-base-100 rounded-2xl p-8 shadow-xl border border-base-300/20 h-fit">
+          <motion.div 
+            className="lg:col-span-2 space-y-6"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="glass-card rounded-3xl p-8 shadow-xl">
               <h3 className="text-2xl font-bold text-base-content mb-6">
                 Let's Connect
               </h3>
@@ -109,72 +115,86 @@ const Contact = () => {
                 Whether you have a question or just want to say hi, feel free to reach out!
               </p>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {profile?.email && (
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base-content">Email</div>
-                      <a 
-                        href={`mailto:${profile.email}`}
-                        className="text-base-content/70 hover:text-primary transition-colors"
-                      >
-                        {profile.email}
-                      </a>
+                  <div className="glass-card rounded-2xl p-4 hover-lift">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                        <Mail className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-base-content text-sm mb-1">Email</div>
+                        <a 
+                          href={`mailto:${profile.email}`}
+                          className="text-base-content/70 hover:text-primary transition-colors text-sm break-all"
+                        >
+                          {profile.email}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {profile?.phone && (
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-secondary" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base-content">Phone</div>
-                      <a 
-                        href={`tel:${profile.phone}`}
-                        className="text-base-content/70 hover:text-secondary transition-colors"
-                      >
-                        {profile.phone}
-                      </a>
+                  <div className="glass-card rounded-2xl p-4 hover-lift">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-secondary/30 to-accent/30 rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                        <Phone className="w-6 h-6 text-secondary" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-base-content text-sm mb-1">Phone</div>
+                        <a 
+                          href={`tel:${profile.phone}`}
+                          className="text-base-content/70 hover:text-secondary transition-colors text-sm"
+                        >
+                          {profile.phone}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {profile?.location && (
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-accent" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base-content">Location</div>
-                      <div className="text-base-content/70">{profile.location}</div>
+                  <div className="glass-card rounded-2xl p-4 hover-lift">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-accent/30 to-primary/30 rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                        <MapPin className="w-6 h-6 text-accent" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-base-content text-sm mb-1">Location</div>
+                        <div className="text-base-content/70 text-sm">{profile.location}</div>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Response Time */}
-              <div className="mt-8 p-4 bg-success/10 rounded-xl border border-success/20">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-success" />
-                  <span className="text-success font-medium">Quick Response</span>
+            {/* Response Time Card */}
+            <div className="glass-card rounded-3xl p-6 bg-gradient-to-br from-success/10 to-primary/5">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center shrink-0">
+                  <CheckCircle className="w-6 h-6 text-success" />
                 </div>
-                <p className="text-success/80 text-sm mt-1">
-                  I typically respond within 24 hours
-                </p>
+                <div>
+                  <div className="font-semibold text-base-content mb-1">Quick Response</div>
+                  <p className="text-base-content/70 text-sm">
+                    I typically respond within 24 hours
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Contact Form */}
-          <div className={`transition-all duration-1000 delay-400 ${
-            hasIntersected ? 'animate-slide-up' : 'opacity-0 translate-y-8'
-          }`}>
-            <div className="bg-base-100 rounded-2xl p-8 shadow-xl border border-base-300/20">
+          <motion.div 
+            className="lg:col-span-3"
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="glass-card rounded-3xl p-8 shadow-xl h-full">
               <h3 className="text-2xl font-bold text-base-content mb-6">
                 Send a Message
               </h3>
@@ -268,7 +288,7 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn btn-primary w-full btn-lg"
+                  className="btn btn-gradient w-full btn-lg shadow-lg hover:shadow-xl"
                 >
                   {submitting ? (
                     <>
@@ -284,7 +304,7 @@ const Contact = () => {
                 </button>
               </form>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

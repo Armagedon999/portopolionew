@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, Download, Github, Linkedin, Mail } from 'lucide-react';
+import { ChevronDown, Download, Github, Linkedin, Mail, ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { db } from '../../lib/supabase';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
@@ -40,129 +41,249 @@ const Hero = () => {
     <section 
       id="home" 
       ref={elementRef}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 relative overflow-hidden"
+      className="min-h-screen relative overflow-hidden bg-base-100"
     >
-      {/* Animated Background Elements */}
+      {/* Premium Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-accent/30 rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+        <motion.div 
+          className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 rounded-full mesh-blob"
+          animate={{ 
+            x: [0, 50, 0],
+            y: [0, 30, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full mesh-blob"
+          animate={{ 
+            x: [0, -30, 0],
+            y: [0, -50, 0],
+            scale: [1, 1.15, 1]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className={`text-center max-w-4xl mx-auto transition-all duration-1000 ${
-          hasIntersected ? 'animate-fade-in' : 'opacity-0'
-        }`}>
-          {/* Profile Image */}
-          <div className={`mb-8 transition-all duration-1000 delay-200 ${
-            hasIntersected ? 'animate-scale-in' : 'opacity-0 scale-90'
-          }`}>
-            <div className="w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl">
-              {profile?.hero_image?.url || profile?.avatar_url ? (
-                <img 
-                  src={profile.hero_image?.url || profile.avatar_url} 
-                  alt={profile.hero_image?.alt_text || profile.full_name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <span className="text-4xl font-bold text-white">
-                    {profile?.full_name?.charAt(0) || 'D'}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Hero Content */}
-          <div className={`space-y-6 transition-all duration-1000 delay-300 ${
-            hasIntersected ? 'animate-slide-up' : 'opacity-0 translate-y-8'
-          }`}>
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              {profile?.hero_title || 'Hi, I\'m a Developer'}
-            </h1>
-            
-            <h2 className="text-2xl md:text-3xl font-semibold text-base-content/80">
-              {profile?.hero_subtitle || profile?.title || 'Full Stack Web Developer'}
-            </h2>
-            
-            <p className="text-lg md:text-xl text-base-content/70 max-w-2xl mx-auto leading-relaxed">
-              {profile?.hero_description || profile?.bio || 'I create amazing digital experiences with modern technologies.'}
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center mt-10 transition-all duration-1000 delay-500 ${
-            hasIntersected ? 'animate-slide-up' : 'opacity-0 translate-y-8'
-          }`}>
-            <button 
-              onClick={() => document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-              className="btn btn-primary btn-lg group"
+        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-screen py-20">
+          {/* Left Content */}
+          <motion.div 
+            className="space-y-8"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            {/* Badge */}
+            <motion.div 
+              className="inline-flex items-center gap-2 px-4 py-2 glass-card rounded-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
-              View My Work
-              <ChevronDown className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
-            </button>
-            
-            {profile?.resume_url && (
-              <a 
-                href={profile.resume_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-outline btn-lg"
-              >
-                <Download className="w-5 h-5" />
-                Download Resume
-              </a>
-            )}
-          </div>
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-base-content/80">Available for new projects</span>
+            </motion.div>
 
-          {/* Social Links */}
-          <div className={`flex justify-center gap-6 mt-10 transition-all duration-1000 delay-700 ${
-            hasIntersected ? 'animate-slide-up' : 'opacity-0 translate-y-8'
-          }`}>
-            {profile?.github_url && (
-              <a 
-                href={profile.github_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-circle btn-ghost btn-lg hover:btn-primary group"
+            {/* Main Heading */}
+            <div className="space-y-4">
+              <motion.h1 
+                className="text-display gradient-text"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <Github className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              </a>
-            )}
-            
-            {profile?.linkedin_url && (
-              <a 
-                href={profile.linkedin_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-circle btn-ghost btn-lg hover:btn-primary group"
+                {profile?.hero_title || "Hi, I'm a Developer"}
+              </motion.h1>
+              
+              <motion.h2 
+                className="text-heading text-base-content/90"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
               >
-                <Linkedin className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              </a>
-            )}
-            
-            {profile?.email && (
-              <a 
-                href={`mailto:${profile.email}`}
-                className="btn btn-circle btn-ghost btn-lg hover:btn-primary group"
+                {profile?.hero_subtitle || profile?.title || 'Full Stack Web Developer'}
+              </motion.h2>
+              
+              <motion.p 
+                className="text-body-lg text-base-content/70 max-w-xl leading-relaxed"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <Mail className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              </a>
-            )}
-          </div>
+                {profile?.hero_description || profile?.bio || 'I create amazing digital experiences with modern technologies.'}
+              </motion.p>
+            </div>
+
+            {/* Action Buttons */}
+            <motion.div 
+              className="flex flex-wrap gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
+              <button 
+                onClick={() => document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })}
+                className="btn btn-gradient btn-lg group shadow-xl hover:shadow-2xl"
+              >
+                View My Work
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              {profile?.resume_url && (
+                <a 
+                  href={profile.resume_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-lg glass-card hover:glass-card"
+                >
+                  <Download className="w-5 h-5" />
+                  Download Resume
+                </a>
+              )}
+            </motion.div>
+
+            {/* Social Links */}
+            <motion.div 
+              className="flex gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              {profile?.github_url && (
+                <a 
+                  href={profile.github_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
+                >
+                  <Github className="w-5 h-5 group-hover:scale-110 transition-transform text-base-content" />
+                </a>
+              )}
+              
+              {profile?.linkedin_url && (
+                <a 
+                  href={profile.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
+                >
+                  <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform text-base-content" />
+                </a>
+              )}
+              
+              {profile?.email && (
+                <a 
+                  href={`mailto:${profile.email}`}
+                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
+                >
+                  <Mail className="w-5 h-5 group-hover:scale-110 transition-transform text-base-content" />
+                </a>
+              )}
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div 
+              className="grid grid-cols-3 gap-6 pt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+            >
+              <div className="space-y-1">
+                <div className="text-3xl font-bold gradient-text">5+</div>
+                <div className="text-sm text-base-content/60">Years Experience</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl font-bold gradient-text">50+</div>
+                <div className="text-sm text-base-content/60">Projects Done</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl font-bold gradient-text">30+</div>
+                <div className="text-sm text-base-content/60">Happy Clients</div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right Image - Large Rectangle */}
+          <motion.div 
+            className="relative"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <div className="relative">
+              {/* Decorative Elements */}
+              <motion.div 
+                className="absolute -top-6 -left-6 w-32 h-32 bg-primary/20 rounded-2xl"
+                animate={{ rotate: [0, 5, 0] }}
+                transition={{ duration: 5, repeat: Infinity }}
+              />
+              <motion.div 
+                className="absolute -bottom-6 -right-6 w-40 h-40 bg-secondary/20 rounded-2xl"
+                animate={{ rotate: [0, -5, 0] }}
+                transition={{ duration: 7, repeat: Infinity }}
+              />
+
+              {/* Main Image Container */}
+              <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-w-md mx-auto">
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10"></div>
+                
+                {profile?.hero_image?.url || profile?.avatar_url ? (
+                  <img 
+                    src={profile.hero_image?.url || profile.avatar_url} 
+                    alt={profile.hero_image?.alt_text || profile.full_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="text-8xl font-bold mb-4">
+                        {profile?.full_name?.charAt(0) || 'D'}
+                      </div>
+                      <div className="text-2xl font-semibold">
+                        {profile?.full_name || 'Developer'}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Floating Badge */}
+                <motion.div
+                  className="absolute bottom-6 left-6 right-6 glass-card rounded-2xl p-4 z-20 dark:bg-base-100/20 dark:backdrop-blur-lg"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1 }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-white/80 dark:text-base-content/80">Currently working on</div>
+                      <div className="font-semibold text-white dark:text-base-content">Innovative Projects</div>
+                    </div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse dark:bg-green-500"></div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Scroll Indicator */}
-      <button 
+      <motion.button 
         onClick={scrollToAbout}
-        className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer transition-all duration-1000 delay-1000 ${
-          hasIntersected ? 'opacity-70 hover:opacity-100' : 'opacity-0'
-        }`}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 0.7 }}
       >
-        <ChevronDown className="w-8 h-8 text-base-content" />
-      </button>
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-sm text-base-content/60">Scroll Down</span>
+          <ChevronDown className="w-6 h-6 text-base-content/60" />
+        </div>
+      </motion.button>
     </section>
   );
 };

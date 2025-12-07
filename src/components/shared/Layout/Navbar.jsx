@@ -34,19 +34,19 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-base-100/95 backdrop-blur-md shadow-lg' 
-        : 'bg-transparent'
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+      isScrolled
+        ? 'navbar-blur shadow-lg'
+        : 'bg-base-100/80 backdrop-blur-sm'
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center space-x-2 text-2xl font-bold text-primary hover:scale-105 transition-transform"
+            className="flex items-center space-x-2 text-2xl font-bold gradient-text hover:scale-105 transition-transform"
           >
-            <Code2 className="w-8 h-8" />
+            <Code2 className="w-8 h-8 text-primary" />
             <span>DevPortfolio</span>
           </Link>
 
@@ -56,9 +56,10 @@ const Navbar = () => {
               <button
                 key={link.href}
                 onClick={() => scrollToSection(link.href)}
-                className="text-base-content hover:text-primary transition-colors duration-200 font-medium"
+                className="text-base-content hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary group-hover:w-full transition-all duration-300"></span>
               </button>
             ))}
             
@@ -78,7 +79,7 @@ const Navbar = () => {
             {/* Admin Link */}
             <Link 
               to="/admin" 
-              className="btn btn-primary btn-sm"
+              className="btn btn-gradient btn-sm shadow-md hover:shadow-lg"
             >
               Admin
             </Link>
@@ -116,7 +117,7 @@ const Navbar = () => {
         <div className={`md:hidden transition-all duration-300 overflow-hidden ${
           isOpen ? 'max-h-96 pb-4' : 'max-h-0'
         }`}>
-          <div className="flex flex-col space-y-2 pt-2">
+          <div className="flex flex-col space-y-2 pt-2 glass-card rounded-lg mx-4 px-4 py-2">
             {navLinks.map((link) => (
               <button
                 key={link.href}
