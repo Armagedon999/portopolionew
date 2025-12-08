@@ -117,7 +117,7 @@ const Navbar = () => {
         <div className={`md:hidden transition-all duration-300 overflow-hidden ${
           isOpen ? 'max-h-96 pb-4' : 'max-h-0'
         }`}>
-          <div className="flex flex-col space-y-2 pt-2 glass-card rounded-lg mx-4 px-4 py-2">
+          <div className="flex flex-col space-y-2 pt-2 bg-base-100 rounded-lg mx-4 px-4 py-2 shadow-lg">
             {navLinks.map((link) => (
               <button
                 key={link.href}

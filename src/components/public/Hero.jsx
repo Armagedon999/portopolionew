@@ -226,7 +226,7 @@ const Hero = () => {
               />
 
               {/* Main Image Container */}
-              <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-w-md mx-auto">
+              <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-w-sm mx-auto">
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10"></div>
                 

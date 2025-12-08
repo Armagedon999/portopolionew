@@ -111,14 +111,12 @@ const About = () => {
           viewport={{ once: true }}
         >
           {/* Large Bio Card - Spans 2 columns */}
-          <motion.div 
-            className="lg:col-span-2 glass-card rounded-3xl p-8 hover-lift"
+          <motion.div
+            className="lg:col-span-2 glass-card rounded-3xl p-8"
             variants={itemVariants}
           >
             <div className="flex items-start gap-4 mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-2xl flex items-center justify-center shadow-lg">
-                <User className="w-8 h-8 text-primary" />
-              </div>
+              <User className="w-8 h-8 text-primary" />
               <div>
                 <h3 className="text-2xl font-bold text-base-content mb-2">
                   {profile?.full_name || 'Full Stack Developer'}
@@ -155,8 +153,8 @@ const About = () => {
           </motion.div>
 
           {/* Image Card */}
-          <motion.div 
-            className="glass-card rounded-3xl overflow-hidden hover-lift aspect-square"
+          <motion.div
+            className="glass-card rounded-3xl overflow-hidden aspect-square"
             variants={itemVariants}
           >
             {(() => {
@@ -192,13 +190,11 @@ const About = () => {
 
           {/* Location Card */}
           {profile?.location && (
-            <motion.div 
-              className="glass-card rounded-3xl p-6 hover-lift flex flex-col justify-between"
+            <motion.div
+              className="glass-card rounded-3xl p-6 flex flex-col justify-between"
               variants={itemVariants}
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-xl flex items-center justify-center shadow-lg mb-4">
-                <MapPin className="w-6 h-6 text-primary" />
-              </div>
+              <MapPin className="w-6 h-6 text-primary mb-4" />
               <div>
                 <div className="text-sm text-base-content/60 mb-1">Based in</div>
                 <div className="text-xl font-bold text-base-content">{profile.location}</div>
@@ -207,13 +203,11 @@ const About = () => {
           )}
 
           {/* Title Card */}
-          <motion.div 
-            className="glass-card rounded-3xl p-6 hover-lift flex flex-col justify-between"
+          <motion.div
+            className="glass-card rounded-3xl p-6 flex flex-col justify-between"
             variants={itemVariants}
           >
-            <div className="w-12 h-12 bg-gradient-to-br from-secondary/30 to-accent/30 rounded-xl flex items-center justify-center shadow-lg mb-4">
-              <Award className="w-6 h-6 text-secondary" />
-            </div>
+            <Award className="w-6 h-6 text-secondary mb-4" />
             <div>
               <div className="text-sm text-base-content/60 mb-1">Role</div>
               <div className="text-xl font-bold text-base-content">
@@ -224,13 +218,11 @@ const About = () => {
 
           {/* Email Card */}
           {profile?.email && (
-            <motion.div 
-              className="glass-card rounded-3xl p-6 hover-lift flex flex-col justify-between"
+            <motion.div
+              className="glass-card rounded-3xl p-6 flex flex-col justify-between"
               variants={itemVariants}
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-accent/30 to-primary/30 rounded-xl flex items-center justify-center shadow-lg mb-4">
-                <Mail className="w-6 h-6 text-accent" />
-              </div>
+              <Mail className="w-6 h-6 text-accent mb-4" />
               <div>
                 <div className="text-sm text-base-content/60 mb-1">Email</div>
                 <a 
@@ -244,29 +236,23 @@ const About = () => {
           )}
 
           {/* Experience Highlight Card - Spans 2 columns */}
-          <motion.div 
-            className="lg:col-span-2 glass-card rounded-3xl p-8 hover-lift"
+          <motion.div
+            className="lg:col-span-2 glass-card rounded-3xl p-8"
             variants={itemVariants}
           >
             <div className="grid grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <Code2 className="w-8 h-8 text-primary" />
-                </div>
+                <Code2 className="w-8 h-8 text-primary mx-auto mb-3" />
                 <div className="text-3xl font-bold gradient-text mb-1">50+</div>
                 <div className="text-sm text-base-content/60">Projects Completed</div>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-secondary/20 to-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <Briefcase className="w-8 h-8 text-secondary" />
-                </div>
+                <Briefcase className="w-8 h-8 text-secondary mx-auto mb-3" />
                 <div className="text-3xl font-bold gradient-text mb-1">30+</div>
                 <div className="text-sm text-base-content/60">Happy Clients</div>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <Zap className="w-8 h-8 text-accent" />
-                </div>
+                <Zap className="w-8 h-8 text-accent mx-auto mb-3" />
                 <div className="text-3xl font-bold gradient-text mb-1">5+</div>
                 <div className="text-sm text-base-content/60">Years Experience</div>
               </div>
@@ -275,13 +261,11 @@ const About = () => {
 
           {/* Phone Card */}
           {profile?.phone && (
-            <motion.div 
-              className="glass-card rounded-3xl p-6 hover-lift flex flex-col justify-between"
+            <motion.div
+              className="glass-card rounded-3xl p-6 flex flex-col justify-between"
               variants={itemVariants}
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-success/30 to-primary/30 rounded-xl flex items-center justify-center shadow-lg mb-4">
-                <Phone className="w-6 h-6 text-success" />
-              </div>
+              <Phone className="w-6 h-6 text-success mb-4" />
               <div>
                 <div className="text-sm text-base-content/60 mb-1">Phone</div>
                 <a 

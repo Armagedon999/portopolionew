@@ -118,7 +118,7 @@ const Skills = () => {
   });
 
   // Marquee Row Component - Infinite Scrolling - Optimized
-  const MarqueeRow = memo(({ category, categorySkills, direction = 'left', speed = 20 }) => {
+  const MarqueeRow = memo(({ category, categorySkills, direction = 'left', speed = 40 }) => {
     // Duplicate skills untuk seamless loop (2 set untuk infinite scroll)
     const duplicatedSkills = useMemo(() => [...categorySkills, ...categorySkills], [categorySkills]);
     const containerRef = useRef(null);
@@ -233,11 +233,11 @@ const Skills = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
             >
-              <MarqueeRow 
+              <MarqueeRow
                 category={category}
                 categorySkills={categorySkills}
                 direction={categoryIndex % 2 === 0 ? 'left' : 'right'}
-                speed={15 + (categoryIndex % 3) * 5}
+                speed={30 + (categoryIndex % 3) * 10}
               />
             </motion.div>
           ))}
