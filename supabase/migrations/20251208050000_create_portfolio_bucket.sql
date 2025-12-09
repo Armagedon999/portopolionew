@@ -10,6 +10,12 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('portfolio', 'portfolio', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- Drop existing policies if they exist (to allow re-running migration)
+DROP POLICY IF EXISTS "Portfolio images are publicly accessible" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload portfolio images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can update portfolio images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can delete portfolio images" ON storage.objects;
+
 -- Allow public access to portfolio images
 CREATE POLICY "Portfolio images are publicly accessible"
 ON storage.objects FOR SELECT

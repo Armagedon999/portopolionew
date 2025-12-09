@@ -42,13 +42,12 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link 
-            to="/" 
-            className="flex items-center space-x-2 text-2xl font-bold gradient-text hover:scale-105 transition-transform"
+          <button
+            onClick={() => scrollToSection('#home')}
+            className="text-xl md:text-2xl font-bold text-primary hover:text-secondary transition-colors"
           >
-            <Code2 className="w-8 h-8 text-primary" />
-            <span>DevPortfolio</span>
-          </Link>
+            My Portfolio
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -76,13 +75,6 @@ const Navbar = () => {
               )}
             </button>
 
-            {/* Admin Link */}
-            <Link 
-              to="/admin" 
-              className="btn btn-gradient btn-sm shadow-md hover:shadow-lg"
-            >
-              Admin
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -127,13 +119,6 @@ const Navbar = () => {
                 {link.label}
               </button>
             ))}
-            <Link 
-              to="/admin" 
-              className="btn btn-primary btn-sm mx-4 mt-2"
-              onClick={() => setIsOpen(false)}
-            >
-              Admin Panel
-            </Link>
           </div>
         </div>
       </div>

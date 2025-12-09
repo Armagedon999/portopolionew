@@ -15,11 +15,27 @@ const Hero = () => {
 
   const loadProfile = async () => {
     try {
+      setLoading(true);
       const { data, error } = await db.getProfile();
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading profile:', error);
+        // Set default profile to prevent errors
+        setProfile({
+          hero_title: "Hi, I'm a Developer",
+          title: 'Full Stack Web Developer',
+          bio: 'I create amazing digital experiences with modern technologies.'
+        });
+        return;
+      }
       setProfile(data);
     } catch (error) {
       console.error('Error loading profile:', error);
+      // Set default profile to prevent errors
+      setProfile({
+        hero_title: "Hi, I'm a Developer",
+        title: 'Full Stack Web Developer',
+        bio: 'I create amazing digital experiences with modern technologies.'
+      });
     } finally {
       setLoading(false);
     }
@@ -182,27 +198,6 @@ const Hero = () => {
                 </a>
               )}
             </motion.div>
-
-            {/* Stats */}
-            <motion.div 
-              className="grid grid-cols-3 gap-6 pt-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-            >
-              <div className="space-y-1">
-                <div className="text-3xl font-bold gradient-text">5+</div>
-                <div className="text-sm text-base-content/60">Years Experience</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-bold gradient-text">50+</div>
-                <div className="text-sm text-base-content/60">Projects Done</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-bold gradient-text">30+</div>
-                <div className="text-sm text-base-content/60">Happy Clients</div>
-              </div>
-            </motion.div>
           </motion.div>
 
           {/* Right Image - Large Rectangle */}
@@ -230,11 +225,15 @@ const Hero = () => {
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10"></div>
                 
-                {profile?.hero_image?.url || profile?.avatar_url ? (
+                {(profile?.hero_image?.url || profile?.avatar_url) ? (
                   <img 
                     src={profile.hero_image?.url || profile.avatar_url} 
-                    alt={profile.hero_image?.alt_text || profile.full_name}
+                    alt={profile.hero_image?.alt_text || profile.full_name || 'Profile Image'}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Error loading hero image:', profile.hero_image?.url || profile.avatar_url);
+                      e.target.style.display = 'none';
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">

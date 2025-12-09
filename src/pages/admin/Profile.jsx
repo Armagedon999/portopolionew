@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, User, Mail, MapPin, Phone, Github, Linkedin, Globe, FileText } from 'lucide-react';
+import { Save, User, Mail, MapPin, Phone, Github, Linkedin, Globe, FileText, Image as ImageIcon } from 'lucide-react';
 import { db } from '../../lib/supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import toast from 'react-hot-toast';
@@ -21,6 +21,7 @@ const Profile = () => {
     hero_subtitle: '',
     hero_description: ''
   });
+  const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -30,10 +31,38 @@ const Profile = () => {
 
   const loadProfile = async () => {
     try {
+      setLoading(true);
       const { data, error } = await db.getProfile();
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Error loading profile:', error);
+        toast.error(`Failed to load profile data: ${error.message || 'Unknown error'}`);
+        // Set empty profile to allow editing
+        setProfileData(null);
+        setProfile({
+          full_name: '',
+          title: '',
+          bio: '',
+          email: '',
+          phone: '',
+          location: '',
+          linkedin_url: '',
+          github_url: '',
+          twitter_url: '',
+          website_url: '',
+          resume_url: '',
+          hero_title: '',
+          hero_subtitle: '',
+          hero_description: ''
+        });
+        return;
+      }
       
       if (data) {
+        // Store full profile data for image references
+        setProfileData(data);
+        
+        // Set form data
         setProfile({
           full_name: data.full_name || '',
           title: data.title || '',
@@ -50,10 +79,47 @@ const Profile = () => {
           hero_subtitle: data.hero_subtitle || '',
           hero_description: data.hero_description || ''
         });
+      } else {
+        // No profile data exists, set empty form
+        setProfileData(null);
+        setProfile({
+          full_name: '',
+          title: '',
+          bio: '',
+          email: '',
+          phone: '',
+          location: '',
+          linkedin_url: '',
+          github_url: '',
+          twitter_url: '',
+          website_url: '',
+          resume_url: '',
+          hero_title: '',
+          hero_subtitle: '',
+          hero_description: ''
+        });
       }
     } catch (error) {
       console.error('Error loading profile:', error);
-      toast.error('Failed to load profile data');
+      toast.error(`Failed to load profile data: ${error.message || 'Unknown error'}`);
+      // Set empty profile to allow editing
+      setProfileData(null);
+      setProfile({
+        full_name: '',
+        title: '',
+        bio: '',
+        email: '',
+        phone: '',
+        location: '',
+        linkedin_url: '',
+        github_url: '',
+        twitter_url: '',
+        website_url: '',
+        resume_url: '',
+        hero_title: '',
+        hero_subtitle: '',
+        hero_description: ''
+      });
     } finally {
       setLoading(false);
     }
@@ -68,6 +134,8 @@ const Profile = () => {
       if (error) throw error;
       
       toast.success('Profile updated successfully!');
+      // Reload profile data to get updated images
+      await loadProfile();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
@@ -282,6 +350,79 @@ const Profile = () => {
                   placeholder="https://example.com/resume.pdf"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Current Images Preview */}
+          <div className="bg-base-100 rounded-xl p-6 shadow-lg border border-base-300/20">
+            <h2 className="text-xl font-bold text-base-content mb-6 flex items-center">
+              <ImageIcon className="w-6 h-6 mr-2 text-primary" />
+              Current Images
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Hero Image */}
+              <div>
+                <label className="label">
+                  <span className="label-text font-semibold">Hero Image</span>
+                </label>
+                <div className="relative w-full h-48 bg-base-200 rounded-lg overflow-hidden">
+                  {profileData?.hero_image?.url ? (
+                    <img
+                      src={profileData.hero_image.url}
+                      alt={profileData.hero_image.alt_text || 'Hero Image'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <ImageIcon className="w-12 h-12 text-base-content/30 mx-auto mb-2" />
+                        <p className="text-sm text-base-content/60">No hero image set</p>
+                        <p className="text-xs text-base-content/40 mt-1">Set it in Image Management</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {profileData?.hero_image && (
+                  <p className="text-xs text-base-content/60 mt-2">
+                    {profileData.hero_image.name}
+                  </p>
+                )}
+              </div>
+
+              {/* About Image */}
+              <div>
+                <label className="label">
+                  <span className="label-text font-semibold">About Image</span>
+                </label>
+                <div className="relative w-full h-48 bg-base-200 rounded-lg overflow-hidden">
+                  {profileData?.about_image?.url ? (
+                    <img
+                      src={profileData.about_image.url}
+                      alt={profileData.about_image.alt_text || 'About Image'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <ImageIcon className="w-12 h-12 text-base-content/30 mx-auto mb-2" />
+                        <p className="text-sm text-base-content/60">No about image set</p>
+                        <p className="text-xs text-base-content/40 mt-1">Set it in Image Management</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {profileData?.about_image && (
+                  <p className="text-xs text-base-content/60 mt-2">
+                    {profileData.about_image.name}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-info/10 rounded-lg">
+              <p className="text-sm text-base-content/70">
+                <strong>Note:</strong> To change images, go to <strong>Image Management</strong> and set images as Hero or About.
+              </p>
             </div>
           </div>
 

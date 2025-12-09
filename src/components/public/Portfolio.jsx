@@ -137,12 +137,18 @@ const Portfolio = () => {
                         src={project.image_url}
                         alt={project.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                          console.error('Error loading project image:', project.image_url);
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                        <Code className="w-16 h-16 text-primary/50" />
-                      </div>
-                    )}
+                    ) : null}
+                    <div 
+                      className={`w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ${project.image_url ? 'hidden' : ''}`}
+                    >
+                      <Code className="w-16 h-16 text-primary/50" />
+                    </div>
 
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500"></div>
@@ -289,12 +295,18 @@ const Portfolio = () => {
                       src={project.image_url} 
                       alt={project.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      onError={(e) => {
+                        console.error('Error loading project image:', project.image_url);
+                        e.target.style.display = 'none';
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                      <Code className="w-16 h-16 text-primary/50" />
-                    </div>
-                  )}
+                  ) : null}
+                  <div 
+                    className={`w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ${project.image_url ? 'hidden' : ''}`}
+                  >
+                    <Code className="w-16 h-16 text-primary/50" />
+                  </div>
                   
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500"></div>
@@ -398,6 +410,10 @@ const Portfolio = () => {
                       src={selectedProject.image_url}
                       alt={selectedProject.title}
                       className="w-full h-64 object-cover rounded-xl shadow-lg"
+                      onError={(e) => {
+                        console.error('Error loading project image:', selectedProject.image_url);
+                        e.target.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}

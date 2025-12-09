@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { db, storage } from '../../lib/supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
+import toast from 'react-hot-toast';
 
 const ImageManagement = () => {
   const [images, setImages] = useState([]);
@@ -30,6 +31,8 @@ const ImageManagement = () => {
     is_active: true,
     sort_order: 0
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -37,15 +40,27 @@ const ImageManagement = () => {
 
   const loadData = async () => {
     try {
+      setLoading(true);
       const [imagesRes, profileRes] = await Promise.all([
         db.getAllImages(),
         db.getProfile()
       ]);
 
+      if (imagesRes.error) {
+        console.error('Error loading images:', imagesRes.error);
+        toast.error('Failed to load images');
+      }
+      
+      if (profileRes.error) {
+        console.error('Error loading profile:', profileRes.error);
+        toast.error('Failed to load profile');
+      }
+
       setImages(imagesRes.data || []);
       setProfile(profileRes.data);
     } catch (error) {
       console.error('Error loading data:', error);
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -53,21 +68,81 @@ const ImageManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate: new images must have a file, editing can keep existing
+    if (!editingImage && !selectedFile) {
+      toast.error('Please select an image file to upload');
+      return;
+    }
+
     setUploading(true);
 
     try {
+      let imageUrl = formData.url;
+
+      // If a new file is selected, upload it to Supabase storage
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `images/${formData.section}/${fileName}`;
+
+        // Upload file to Supabase storage
+        const { data: uploadData, error: uploadError } = await storage.uploadFile('images', filePath, selectedFile);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        imageUrl = storage.getPublicUrl('images', filePath);
+
+        // If editing and there's an old image, delete it from storage
+        if (editingImage && editingImage.url && editingImage.url.includes('supabase')) {
+          try {
+            // Extract path from URL - handle different URL formats
+            let oldPath = null;
+            if (editingImage.url.includes('/storage/v1/object/public/images/')) {
+              const urlParts = editingImage.url.split('/storage/v1/object/public/images/');
+              if (urlParts.length > 1) {
+                oldPath = urlParts[1].split('?')[0]; // Remove query params if any
+              }
+            } else if (editingImage.url.includes('/storage/v1/object/sign/images/')) {
+              // Handle signed URLs
+              const urlParts = editingImage.url.split('/storage/v1/object/sign/images/');
+              if (urlParts.length > 1) {
+                oldPath = urlParts[1].split('?')[0].split('&')[0]; // Remove query params
+              }
+            }
+            
+            if (oldPath) {
+              await storage.deleteFile('images', oldPath);
+            }
+          } catch (deleteError) {
+            console.warn('Error deleting old image:', deleteError);
+            // Continue even if deletion fails
+          }
+        }
+      }
+
+      // Update formData with the new URL (or keep existing if editing without new file)
+      const imageData = {
+        ...formData,
+        url: imageUrl || editingImage?.url
+      };
+
       if (editingImage) {
-        await db.updateImage(editingImage.id, formData);
+        await db.updateImage(editingImage.id, imageData);
       } else {
-        await db.createImage(formData);
+        await db.createImage(imageData);
       }
 
       await loadData();
       resetForm();
       setShowModal(false);
+      toast.success(editingImage ? 'Image updated successfully!' : 'Image created successfully!');
     } catch (error) {
       console.error('Error saving image:', error);
-      alert('Error saving image. Please try again.');
+      toast.error(`Error saving image: ${error.message || 'Please try again.'}`);
     } finally {
       setUploading(false);
     }
@@ -84,38 +159,77 @@ const ImageManagement = () => {
       is_active: image.is_active,
       sort_order: image.sort_order
     });
+    setSelectedFile(null);
+    setPreviewUrl(image.url);
     setShowModal(true);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this image?')) return;
+    if (!window.confirm('Are you sure you want to delete this image?')) return;
 
     try {
+      // Find the image to get its URL
+      const imageToDelete = images.find(img => img.id === id);
+      
+      // Delete from database
       await db.deleteImage(id);
+      
+      // Delete from storage if it's a Supabase storage URL
+      if (imageToDelete?.url && imageToDelete.url.includes('supabase')) {
+        try {
+          // Extract path from URL - handle different URL formats
+          let filePath = null;
+          if (imageToDelete.url.includes('/storage/v1/object/public/images/')) {
+            const urlParts = imageToDelete.url.split('/storage/v1/object/public/images/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0]; // Remove query params if any
+            }
+          } else if (imageToDelete.url.includes('/storage/v1/object/sign/images/')) {
+            // Handle signed URLs
+            const urlParts = imageToDelete.url.split('/storage/v1/object/sign/images/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0].split('&')[0]; // Remove query params
+            }
+          }
+          
+          if (filePath) {
+            await storage.deleteFile('images', filePath);
+          }
+        } catch (deleteError) {
+          console.warn('Error deleting image from storage:', deleteError);
+          // Continue even if storage deletion fails
+        }
+      }
+      
       await loadData();
+      toast.success('Image deleted successfully!');
     } catch (error) {
       console.error('Error deleting image:', error);
-      alert('Error deleting image. Please try again.');
+      toast.error(`Error deleting image: ${error.message || 'Please try again.'}`);
     }
   };
 
   const handleSetAsHero = async (imageId) => {
     try {
-      await db.updateProfileImages(imageId, profile?.about_image_id);
+      const { error } = await db.updateProfileImages(imageId, profile?.about_image_id);
+      if (error) throw error;
       await loadData();
+      toast.success('Hero image set successfully!');
     } catch (error) {
       console.error('Error setting hero image:', error);
-      alert('Error setting hero image. Please try again.');
+      toast.error(`Error setting hero image: ${error.message || 'Please try again.'}`);
     }
   };
 
   const handleSetAsAbout = async (imageId) => {
     try {
-      await db.updateProfileImages(profile?.hero_image_id, imageId);
+      const { error } = await db.updateProfileImages(profile?.hero_image_id, imageId);
+      if (error) throw error;
       await loadData();
+      toast.success('About image set successfully!');
     } catch (error) {
       console.error('Error setting about image:', error);
-      alert('Error setting about image. Please try again.');
+      toast.error(`Error setting about image: ${error.message || 'Please try again.'}`);
     }
   };
 
@@ -130,6 +244,34 @@ const ImageManagement = () => {
       sort_order: 0
     });
     setEditingImage(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const toggleActive = async (image) => {
@@ -361,16 +503,33 @@ const ImageManagement = () => {
 
                 <div>
                   <label className="label">
-                    <span className="label-text">Image URL *</span>
+                    <span className="label-text">Upload Image *</span>
                   </label>
                   <input
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    className="input input-bordered w-full"
-                    placeholder="https://example.com/image.jpg"
-                    required
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="file-input file-input-bordered w-full"
                   />
+                  <p className="text-xs text-base-content/60 mt-2">
+                    {editingImage ? 'Leave empty to keep current image, or upload a new one' : 'Select an image file (max 5MB)'}
+                  </p>
+                  
+                  {/* Preview */}
+                  {(previewUrl || (editingImage && editingImage.url && !selectedFile)) && (
+                    <div className="mt-4">
+                      <label className="label">
+                        <span className="label-text">Preview</span>
+                      </label>
+                      <div className="relative w-full h-48 bg-base-200 rounded-lg overflow-hidden">
+                        <img
+                          src={previewUrl || editingImage.url}
+                          alt="Preview"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

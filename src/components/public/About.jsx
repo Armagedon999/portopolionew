@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, MapPin, Award, Mail, Phone, Briefcase, Code2, Zap } from 'lucide-react';
+import { User, MapPin, Award, Mail, Phone, Briefcase, Heart, Target, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { db } from '../../lib/supabase';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
@@ -15,6 +15,7 @@ const About = () => {
 
   const loadProfile = async () => {
     try {
+      setLoading(true);
       const { data, error } = await db.getProfile();
       if (error) {
         console.error('Error loading profile:', error);
@@ -25,9 +26,9 @@ const About = () => {
           location: 'Your Location',
           email: 'your.email@example.com'
         });
-      } else {
-        setProfile(data);
+        return;
       }
+      setProfile(data);
     } catch (error) {
       console.error('Error loading profile:', error);
       setProfile({
@@ -168,12 +169,16 @@ const About = () => {
                       src={imageUrl} 
                       alt={imageAlt}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Error loading about image:', imageUrl);
+                        e.target.style.display = 'none';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6">
                       <div className="glass-card rounded-xl p-3 dark:bg-base-100/20 dark:backdrop-blur-lg">
                         <div className="text-white font-semibold dark:text-base-content">Professional Developer</div>
-                        <div className="text-white/80 text-sm dark:text-base-content/80">5+ Years Experience</div>
+                        <div className="text-white/80 text-sm dark:text-base-content/80">Passionate & Dedicated</div>
                       </div>
                     </div>
                   </div>
@@ -235,26 +240,26 @@ const About = () => {
             </motion.div>
           )}
 
-          {/* Experience Highlight Card - Spans 2 columns */}
+          {/* Values & Approach Highlight Card - Spans 2 columns */}
           <motion.div
             className="lg:col-span-2 glass-card rounded-3xl p-8"
             variants={itemVariants}
           >
             <div className="grid grid-cols-3 gap-8">
               <div className="text-center">
-                <Code2 className="w-8 h-8 text-primary mx-auto mb-3" />
-                <div className="text-3xl font-bold gradient-text mb-1">50+</div>
-                <div className="text-sm text-base-content/60">Projects Completed</div>
+                <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
+                <div className="text-3xl font-bold gradient-text mb-1">Passionate</div>
+                <div className="text-sm text-base-content/60">About Code</div>
               </div>
               <div className="text-center">
-                <Briefcase className="w-8 h-8 text-secondary mx-auto mb-3" />
-                <div className="text-3xl font-bold gradient-text mb-1">30+</div>
-                <div className="text-sm text-base-content/60">Happy Clients</div>
+                <Target className="w-8 h-8 text-secondary mx-auto mb-3" />
+                <div className="text-3xl font-bold gradient-text mb-1">Focused</div>
+                <div className="text-sm text-base-content/60">On Quality</div>
               </div>
               <div className="text-center">
-                <Zap className="w-8 h-8 text-accent mx-auto mb-3" />
-                <div className="text-3xl font-bold gradient-text mb-1">5+</div>
-                <div className="text-sm text-base-content/60">Years Experience</div>
+                <Rocket className="w-8 h-8 text-accent mx-auto mb-3" />
+                <div className="text-3xl font-bold gradient-text mb-1">Innovative</div>
+                <div className="text-sm text-base-content/60">Solutions</div>
               </div>
             </div>
           </motion.div>

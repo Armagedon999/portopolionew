@@ -85,12 +85,25 @@ ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (to allow re-running migration)
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Authenticated users can update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Skills are viewable by everyone" ON skills;
+DROP POLICY IF EXISTS "Authenticated users can manage skills" ON skills;
+DROP POLICY IF EXISTS "Published projects are viewable by everyone" ON projects;
+DROP POLICY IF EXISTS "Authenticated users can manage projects" ON projects;
+DROP POLICY IF EXISTS "Anyone can insert contacts" ON contacts;
+DROP POLICY IF EXISTS "Authenticated users can read contacts" ON contacts;
+DROP POLICY IF EXISTS "Authenticated users can update contacts" ON contacts;
+
 -- Policies for profiles
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone"
   ON profiles FOR SELECT
   TO public
   USING (true);
 
+DROP POLICY IF EXISTS "Authenticated users can update their own profile" ON profiles;
 CREATE POLICY "Authenticated users can update their own profile"
   ON profiles FOR ALL
   TO authenticated
@@ -98,38 +111,45 @@ CREATE POLICY "Authenticated users can update their own profile"
   WITH CHECK (auth.uid() = user_id);
 
 -- Policies for skills
+DROP POLICY IF EXISTS "Skills are viewable by everyone" ON skills;
 CREATE POLICY "Skills are viewable by everyone"
   ON skills FOR SELECT
   TO public
   USING (true);
 
+DROP POLICY IF EXISTS "Authenticated users can manage skills" ON skills;
 CREATE POLICY "Authenticated users can manage skills"
   ON skills FOR ALL
   TO authenticated
   USING (true);
 
 -- Policies for projects
+DROP POLICY IF EXISTS "Published projects are viewable by everyone" ON projects;
 CREATE POLICY "Published projects are viewable by everyone"
   ON projects FOR SELECT
   TO public
   USING (status = 'published');
 
+DROP POLICY IF EXISTS "Authenticated users can manage projects" ON projects;
 CREATE POLICY "Authenticated users can manage projects"
   ON projects FOR ALL
   TO authenticated
   USING (true);
 
 -- Policies for contacts
+DROP POLICY IF EXISTS "Anyone can insert contacts" ON contacts;
 CREATE POLICY "Anyone can insert contacts"
   ON contacts FOR INSERT
   TO public
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Authenticated users can read contacts" ON contacts;
 CREATE POLICY "Authenticated users can read contacts"
   ON contacts FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Authenticated users can update contacts" ON contacts;
 CREATE POLICY "Authenticated users can update contacts"
   ON contacts FOR UPDATE
   TO authenticated

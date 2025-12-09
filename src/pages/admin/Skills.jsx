@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Code, Star } from 'lucide-react';
-import { db } from '../../lib/supabase';
+import { Plus, Edit, Trash2, Save, X, Code, Star, Upload, Image as ImageIcon } from 'lucide-react';
+import { db, storage } from '../../lib/supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import toast from 'react-hot-toast';
 
@@ -14,14 +14,18 @@ const Skills = () => {
   const [formData, setFormData] = useState({
     name: '',
     category: 'Frontend',
-    level: 80,
     icon_url: '',
     color: '#3B82F6',
     sort_order: 0,
     is_featured: false
   });
 
-  const categories = [
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [categories, setCategories] = useState([
     'Frontend',
     'Backend',
     'Database',
@@ -31,7 +35,7 @@ const Skills = () => {
     'Design',
     'Tools',
     'Other'
-  ];
+  ]);
 
   const colorOptions = [
     { name: 'Blue', value: '#3B82F6' },
@@ -46,7 +50,57 @@ const Skills = () => {
 
   useEffect(() => {
     loadSkills();
+    loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await db.getSkillCategories();
+      if (error) {
+        console.warn('Error loading categories, using defaults:', error);
+        return;
+      }
+      if (data && data.length > 0) {
+        const categoryNames = data.map(cat => cat.name);
+        setCategories([...categoryNames, 'Other']);
+      }
+    } catch (error) {
+      console.warn('Error loading categories:', error);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Please enter a category name');
+      return;
+    }
+
+    if (categories.includes(newCategoryName.trim())) {
+      toast.error('Category already exists');
+      return;
+    }
+
+    try {
+      const { error } = await db.createSkillCategory({
+        name: newCategoryName.trim(),
+        description: '',
+        icon_name: 'Tool',
+        color: '#3B82F6',
+        sort_order: categories.length
+      });
+
+      if (error) throw error;
+
+      toast.success('Category added successfully!');
+      setFormData({ ...formData, category: newCategoryName.trim() });
+      setNewCategoryName('');
+      setShowCategoryModal(false);
+      await loadCategories();
+    } catch (error) {
+      console.error('Error adding category:', error);
+      toast.error(`Failed to add category: ${error.message || 'Please try again.'}`);
+    }
+  };
 
   const loadSkills = async () => {
     try {
@@ -64,13 +118,66 @@ const Skills = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setUploading(true);
 
     try {
+      let iconUrl = formData.icon_url;
+
+      // If a new file is selected, upload it to Supabase storage
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `skills/${fileName}`;
+
+        // Upload file to Supabase storage
+        const { data: uploadData, error: uploadError } = await storage.uploadFile('images', filePath, selectedFile);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        iconUrl = storage.getPublicUrl('images', filePath);
+
+        // If editing and there's an old icon, delete it from storage
+        if (editingSkill && editingSkill.icon_url && editingSkill.icon_url.includes('supabase')) {
+          try {
+            // Extract path from URL - handle different URL formats
+            let oldPath = null;
+            if (editingSkill.icon_url.includes('/storage/v1/object/public/images/')) {
+              const urlParts = editingSkill.icon_url.split('/storage/v1/object/public/images/');
+              if (urlParts.length > 1) {
+                oldPath = urlParts[1].split('?')[0]; // Remove query params if any
+              }
+            } else if (editingSkill.icon_url.includes('/storage/v1/object/sign/images/')) {
+              // Handle signed URLs
+              const urlParts = editingSkill.icon_url.split('/storage/v1/object/sign/images/');
+              if (urlParts.length > 1) {
+                oldPath = urlParts[1].split('?')[0].split('&')[0]; // Remove query params
+              }
+            }
+            
+            if (oldPath) {
+              await storage.deleteFile('images', oldPath);
+            }
+          } catch (deleteError) {
+            console.warn('Error deleting old icon:', deleteError);
+            // Continue even if deletion fails
+          }
+        }
+      }
+
+      // Update formData with the new URL (or keep existing if editing without new file)
+      const skillData = {
+        ...formData,
+        icon_url: iconUrl || editingSkill?.icon_url
+      };
+
       if (editingSkill) {
-        await db.updateSkill(editingSkill.id, formData);
+        await db.updateSkill(editingSkill.id, skillData);
         toast.success('Skill updated successfully!');
       } else {
-        await db.createSkill(formData);
+        await db.createSkill(skillData);
         toast.success('Skill created successfully!');
       }
 
@@ -79,9 +186,10 @@ const Skills = () => {
       setShowModal(false);
     } catch (error) {
       console.error('Error saving skill:', error);
-      toast.error('Failed to save skill');
+      toast.error(`Failed to save skill: ${error.message || 'Please try again.'}`);
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   };
 
@@ -90,25 +198,58 @@ const Skills = () => {
     setFormData({
       name: skill.name,
       category: skill.category,
-      level: skill.level,
       icon_url: skill.icon_url || '',
       color: skill.color,
       sort_order: skill.sort_order,
       is_featured: skill.is_featured
     });
+    setSelectedFile(null);
+    setPreviewUrl(skill.icon_url || null);
     setShowModal(true);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this skill?')) return;
+    if (!window.confirm('Are you sure you want to delete this skill?')) return;
 
     try {
+      // Find the skill to get its icon URL
+      const skillToDelete = skills.find(s => s.id === id);
+      
+      // Delete from database
       await db.deleteSkill(id);
+      
+      // Delete from storage if it's a Supabase storage URL
+      if (skillToDelete?.icon_url && skillToDelete.icon_url.includes('supabase')) {
+        try {
+          // Extract path from URL - handle different URL formats
+          let filePath = null;
+          if (skillToDelete.icon_url.includes('/storage/v1/object/public/images/')) {
+            const urlParts = skillToDelete.icon_url.split('/storage/v1/object/public/images/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0]; // Remove query params if any
+            }
+          } else if (skillToDelete.icon_url.includes('/storage/v1/object/sign/images/')) {
+            // Handle signed URLs
+            const urlParts = skillToDelete.icon_url.split('/storage/v1/object/sign/images/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0].split('&')[0]; // Remove query params
+            }
+          }
+          
+          if (filePath) {
+            await storage.deleteFile('images', filePath);
+          }
+        } catch (deleteError) {
+          console.warn('Error deleting icon from storage:', deleteError);
+          // Continue even if storage deletion fails
+        }
+      }
+      
       await loadSkills();
       toast.success('Skill deleted successfully!');
     } catch (error) {
       console.error('Error deleting skill:', error);
-      toast.error('Failed to delete skill');
+      toast.error(`Failed to delete skill: ${error.message || 'Please try again.'}`);
     }
   };
 
@@ -116,13 +257,40 @@ const Skills = () => {
     setFormData({
       name: '',
       category: 'Frontend',
-      level: 80,
       icon_url: '',
       color: '#3B82F6',
       sort_order: 0,
       is_featured: false
     });
     setEditingSkill(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 2MB for icons)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('File size must be less than 2MB');
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const toggleFeatured = async (skill) => {
@@ -199,23 +367,6 @@ const Skills = () => {
                 {skill.is_featured && (
                   <Star className="w-5 h-5 text-primary fill-current" />
                 )}
-              </div>
-
-              {/* Skill Level */}
-              <div className="mb-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-base-content/70">Proficiency</span>
-                  <span className="font-semibold">{skill.level}%</span>
-                </div>
-                <div className="w-full bg-base-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${skill.level}%`,
-                      backgroundColor: skill.color
-                    }}
-                  ></div>
-                </div>
               </div>
 
               {/* Action Buttons */}
@@ -309,44 +460,70 @@ const Skills = () => {
                     </label>
                     <select
                       value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      onChange={(e) => {
+                        if (e.target.value === 'Other') {
+                          setShowCategoryModal(true);
+                        } else {
+                          setFormData({ ...formData, category: e.target.value });
+                        }
+                      }}
                       className="select select-bordered w-full"
                       required
                     >
-                      {categories.map((category) => (
+                      {categories.filter(cat => cat !== 'Other').map((category) => (
                         <option key={category} value={category}>
                           {category}
                         </option>
                       ))}
+                      <option value="Other">Other (Add New)</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="label">
-                    <span className="label-text">Proficiency Level: {formData.level}%</span>
+                    <span className="label-text">Technology Logo *</span>
                   </label>
                   <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={formData.level}
-                    onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
-                    className="range range-primary"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="file-input file-input-bordered w-full"
                   />
-                </div>
-
-                <div>
-                  <label className="label">
-                    <span className="label-text">Icon URL</span>
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.icon_url}
-                    onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })}
-                    className="input input-bordered w-full"
-                    placeholder="https://example.com/icon.svg"
-                  />
+                  <p className="text-xs text-base-content/60 mt-2">
+                    {editingSkill ? 'Leave empty to keep current logo, or upload a new one' : 'Select a logo image file (max 2MB)'}
+                  </p>
+                  
+                  {/* Preview */}
+                  {(previewUrl || (editingSkill && editingSkill.icon_url && !selectedFile)) && (
+                    <div className="mt-4">
+                      <label className="label">
+                        <span className="label-text">Preview</span>
+                      </label>
+                      <div className="relative w-24 h-24 bg-base-200 rounded-lg overflow-hidden flex items-center justify-center">
+                        <img
+                          src={previewUrl || editingSkill.icon_url}
+                          alt="Preview"
+                          className="w-full h-full object-contain p-2"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Fallback: Manual URL input (optional) */}
+                  <div className="mt-4">
+                    <label className="label">
+                      <span className="label-text text-xs">Or enter logo URL manually (optional)</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.icon_url}
+                      onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })}
+                      className="input input-bordered w-full input-sm"
+                      placeholder="https://example.com/icon.svg"
+                      disabled={!!selectedFile}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -410,12 +587,12 @@ const Skills = () => {
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={saving}
+                    disabled={saving || uploading}
                   >
-                    {saving ? (
+                    {(saving || uploading) ? (
                       <>
                         <span className="loading loading-spinner loading-sm"></span>
-                        Saving...
+                        {uploading ? 'Uploading...' : 'Saving...'}
                       </>
                     ) : (
                       <>
@@ -426,6 +603,70 @@ const Skills = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-base-100 rounded-xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-base-content">
+                  Add New Category
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowCategoryModal(false);
+                    setNewCategoryName('');
+                    setFormData({ ...formData, category: 'Frontend' });
+                  }}
+                  className="btn btn-ghost btn-sm"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text">Category Name *</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="input input-bordered w-full"
+                    placeholder="e.g., AI/ML, Blockchain, etc."
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCategoryModal(false);
+                      setNewCategoryName('');
+                      setFormData({ ...formData, category: 'Frontend' });
+                    }}
+                    className="btn btn-ghost"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="btn btn-primary"
+                  >
+                    <Save className="w-5 h-5" />
+                    Add Category
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

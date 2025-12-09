@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Briefcase, ExternalLink, Github, Eye, EyeOff } from 'lucide-react';
-import { db } from '../../lib/supabase';
+import { Plus, Edit, Trash2, Save, X, Briefcase, ExternalLink, Github, Eye, EyeOff, Upload, Image as ImageIcon } from 'lucide-react';
+import { db, storage } from '../../lib/supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import toast from 'react-hot-toast';
 
@@ -25,6 +25,9 @@ const Portfolio = () => {
   });
 
   const [techInput, setTechInput] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const statusOptions = [
     { value: 'published', label: 'Published' },
@@ -50,14 +53,74 @@ const Portfolio = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate: new projects must have an image (file or URL)
+    if (!editingProject && !selectedFile && !formData.image_url) {
+      toast.error('Please upload an image or provide an image URL');
+      return;
+    }
+    
     setSaving(true);
+    setUploading(true);
 
     try {
+      let imageUrl = formData.image_url;
+
+      // If a new file is selected, upload it to Supabase storage
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `projects/${fileName}`;
+
+        // Upload file to Supabase storage
+        const { data: uploadData, error: uploadError } = await storage.uploadFile('portfolio', filePath, selectedFile);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        imageUrl = storage.getPublicUrl('portfolio', filePath);
+
+        // If editing and there's an old image, delete it from storage
+        if (editingProject && editingProject.image_url && editingProject.image_url.includes('supabase')) {
+          try {
+            // Extract path from URL - handle different URL formats
+            let oldPath = null;
+            if (editingProject.image_url.includes('/storage/v1/object/public/portfolio/')) {
+              const urlParts = editingProject.image_url.split('/storage/v1/object/public/portfolio/');
+              if (urlParts.length > 1) {
+                oldPath = urlParts[1].split('?')[0]; // Remove query params if any
+              }
+            } else if (editingProject.image_url.includes('/storage/v1/object/sign/portfolio/')) {
+              // Handle signed URLs
+              const urlParts = editingProject.image_url.split('/storage/v1/object/sign/portfolio/');
+              if (urlParts.length > 1) {
+                oldPath = urlParts[1].split('?')[0].split('&')[0]; // Remove query params
+              }
+            }
+            
+            if (oldPath) {
+              await storage.deleteFile('portfolio', oldPath);
+            }
+          } catch (deleteError) {
+            console.warn('Error deleting old image:', deleteError);
+            // Continue even if deletion fails
+          }
+        }
+      }
+
+      // Update formData with the new URL (or keep existing if editing without new file)
+      const projectData = {
+        ...formData,
+        image_url: imageUrl || editingProject?.image_url
+      };
+
       if (editingProject) {
-        await db.updateProject(editingProject.id, formData);
+        await db.updateProject(editingProject.id, projectData);
         toast.success('Project updated successfully!');
       } else {
-        await db.createProject(formData);
+        await db.createProject(projectData);
         toast.success('Project created successfully!');
       }
 
@@ -66,9 +129,10 @@ const Portfolio = () => {
       setShowModal(false);
     } catch (error) {
       console.error('Error saving project:', error);
-      toast.error('Failed to save project');
+      toast.error(`Failed to save project: ${error.message || 'Please try again.'}`);
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   };
 
@@ -86,19 +150,53 @@ const Portfolio = () => {
       is_featured: project.is_featured,
       sort_order: project.sort_order
     });
+    setSelectedFile(null);
+    setPreviewUrl(project.image_url || null);
     setShowModal(true);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!window.confirm('Are you sure you want to delete this project?')) return;
 
     try {
+      // Find the project to get its image URL
+      const projectToDelete = projects.find(p => p.id === id);
+      
+      // Delete from database
       await db.deleteProject(id);
+      
+      // Delete from storage if it's a Supabase storage URL
+      if (projectToDelete?.image_url && projectToDelete.image_url.includes('supabase')) {
+        try {
+          // Extract path from URL - handle different URL formats
+          let filePath = null;
+          if (projectToDelete.image_url.includes('/storage/v1/object/public/portfolio/')) {
+            const urlParts = projectToDelete.image_url.split('/storage/v1/object/public/portfolio/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0]; // Remove query params if any
+            }
+          } else if (projectToDelete.image_url.includes('/storage/v1/object/sign/portfolio/')) {
+            // Handle signed URLs
+            const urlParts = projectToDelete.image_url.split('/storage/v1/object/sign/portfolio/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0].split('&')[0]; // Remove query params
+            }
+          }
+          
+          if (filePath) {
+            await storage.deleteFile('portfolio', filePath);
+          }
+        } catch (deleteError) {
+          console.warn('Error deleting image from storage:', deleteError);
+          // Continue even if storage deletion fails
+        }
+      }
+      
       await loadProjects();
       toast.success('Project deleted successfully!');
     } catch (error) {
       console.error('Error deleting project:', error);
-      toast.error('Failed to delete project');
+      toast.error(`Failed to delete project: ${error.message || 'Please try again.'}`);
     }
   };
 
@@ -117,6 +215,34 @@ const Portfolio = () => {
     });
     setTechInput('');
     setEditingProject(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const addTechStack = () => {
@@ -407,15 +533,48 @@ const Portfolio = () => {
 
                 <div>
                   <label className="label">
-                    <span className="label-text">Project Image URL</span>
+                    <span className="label-text">Project Image *</span>
                   </label>
                   <input
-                    type="url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="input input-bordered w-full"
-                    placeholder="https://example.com/project-image.jpg"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="file-input file-input-bordered w-full"
                   />
+                  <p className="text-xs text-base-content/60 mt-2">
+                    {editingProject ? 'Leave empty to keep current image, or upload a new one' : 'Select an image file (max 5MB)'}
+                  </p>
+                  
+                  {/* Preview */}
+                  {(previewUrl || (editingProject && editingProject.image_url && !selectedFile)) && (
+                    <div className="mt-4">
+                      <label className="label">
+                        <span className="label-text">Preview</span>
+                      </label>
+                      <div className="relative w-full h-48 bg-base-200 rounded-lg overflow-hidden">
+                        <img
+                          src={previewUrl || editingProject.image_url}
+                          alt="Preview"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Fallback: Manual URL input (optional) */}
+                  <div className="mt-4">
+                    <label className="label">
+                      <span className="label-text text-xs">Or enter image URL manually (optional)</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="input input-bordered w-full input-sm"
+                      placeholder="https://example.com/project-image.jpg"
+                      disabled={!!selectedFile}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -524,12 +683,12 @@ const Portfolio = () => {
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={saving}
+                    disabled={saving || uploading}
                   >
-                    {saving ? (
+                    {(saving || uploading) ? (
                       <>
                         <span className="loading loading-spinner loading-sm"></span>
-                        Saving...
+                        {uploading ? 'Uploading...' : 'Saving...'}
                       </>
                     ) : (
                       <>
