@@ -76,12 +76,18 @@ const About = () => {
   ];
 
   return (
-    <section 
-      id="about" 
+    <section
+      id="about"
       ref={elementRef}
-      className="py-20 md:py-32 bg-base-100"
+      className="py-20 md:py-32 bg-base-100 relative overflow-hidden"
     >
-      <div className="w-full px-8 sm:px-12 lg:px-16 xl:px-20 2xl:px-24">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full mesh-blob"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-secondary/5 rounded-full mesh-blob"></div>
+      </div>
+
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 relative z-10">
         {/* Section Header */}
         <motion.div 
           className="mb-16"
@@ -97,7 +103,7 @@ const About = () => {
         </motion.div>
 
         {/* Main Content */}
-        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24 mb-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 2xl:gap-24 mb-16 lg:mb-20">
           {/* Left Column - Image */}
           <motion.div
             initial="hidden"
@@ -209,7 +215,7 @@ const About = () => {
 
         {/* Stats Section */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 xl:gap-12 mb-20 py-12 border-y border-base-300"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 xl:gap-12 mb-16 lg:mb-20 py-8 lg:py-12 border-y border-base-300/50"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -228,7 +234,7 @@ const About = () => {
         </motion.div>
 
         {/* Skills & Expertise */}
-        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 2xl:gap-24">
           {/* Skills */}
           <motion.div
             initial="hidden"
