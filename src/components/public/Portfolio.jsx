@@ -93,16 +93,24 @@ const Portfolio = () => {
         <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full mesh-blob"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className={`text-center mb-16 transition-all duration-1000 ${
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 relative z-10">
+        <div className={`text-center mb-20 transition-all duration-1000 ${
           hasIntersected ? 'animate-fade-in' : 'opacity-0'
         }`}>
-          <h2 className="text-heading gradient-text mb-4">
-            Featured Work
-          </h2>
-          <p className="text-body-lg text-base-content/70 max-w-2xl mx-auto">
-            Here are some of my recent projects that showcase my skills and experience
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-heading gradient-text mb-6">
+              Featured Work
+            </h2>
+            <p className="text-body-lg text-base-content/70 max-w-3xl mx-auto leading-relaxed">
+              Here are some of my recent projects that showcase my skills and experience
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-6 rounded-full"></div>
+          </motion.div>
         </div>
 
         {/* Featured Projects Showcase */}
@@ -114,20 +122,31 @@ const Portfolio = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.1 }}
           >
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold gradient-text mb-2">⭐ Featured Projects</h3>
-              <p className="text-base-content/70">Showcasing my best work</p>
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <h3 className="text-3xl font-bold gradient-text mb-3 flex items-center justify-center gap-2">
+                  <span className="text-2xl">⭐</span>
+                  Featured Projects
+                </h3>
+                <p className="text-base-content/70 text-lg">Showcasing my best work</p>
+              </motion.div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8 xl:gap-10 w-full">
               {projects.filter(p => p.is_featured).slice(0, 3).map((project, index) => (
                 <motion.div
                   key={`featured-${project.id}`}
-                  className="group glass-card rounded-3xl shadow-2xl overflow-hidden hover-lift border-2 border-primary/20"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  className="group glass-card rounded-3xl shadow-2xl overflow-hidden hover-lift border border-primary/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
                   onClick={() => setSelectedProject(project)}
                 >
                   {/* Project Image */}
@@ -275,7 +294,7 @@ const Portfolio = () => {
             <p className="text-lg text-base-content/50">No projects found for the selected filter.</p>
           </motion.div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8 xl:gap-10 w-full">
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}

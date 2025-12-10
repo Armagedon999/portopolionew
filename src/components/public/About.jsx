@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, MapPin, Award, Mail, Phone, Briefcase, Heart, Target, Rocket } from 'lucide-react';
+import { User, MapPin, Mail, Phone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { db } from '../../lib/supabase';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
@@ -55,17 +55,7 @@ const About = () => {
     );
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
+  const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -74,70 +64,133 @@ const About = () => {
     }
   };
 
+  const stats = [
+    { number: '5+', label: 'Years Experience' },
+    { number: '50+', label: 'Projects Completed' },
+    { number: '30+', label: 'Happy Clients' },
+  ];
+
+  const skills = [
+    'Reading', 'Traveling', 'Photography', 'Cooking',
+    'Gaming', 'Music', 'Sports', 'Writing'
+  ];
+
   return (
     <section 
       id="about" 
       ref={elementRef}
-      className="section-padding bg-base-200/30 relative overflow-hidden"
+      className="py-20 md:py-32 bg-base-100"
     >
-      {/* Premium Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full mesh-blob"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 rounded-full mesh-blob"></div>
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="w-full px-8 sm:px-12 lg:px-16 xl:px-20 2xl:px-24">
         {/* Section Header */}
         <motion.div 
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-heading gradient-text mb-4">
-            About Me
-          </h2>
-          <p className="text-body-lg text-base-content/70 max-w-2xl mx-auto">
-            Crafting digital experiences with passion and precision
-          </p>
-        </motion.div>
-
-        {/* Bento Grid Layout */}
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto"
-          variants={containerVariants}
+          className="mb-16"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
+          variants={fadeInUp}
         >
-          {/* Large Bio Card - Spans 2 columns */}
+          <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-4">
+            About Me
+          </h2>
+          <div className="w-20 h-1 bg-primary"></div>
+        </motion.div>
+
+        {/* Main Content */}
+        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24 mb-20">
+          {/* Left Column - Image */}
           <motion.div
-            className="lg:col-span-2 glass-card rounded-3xl p-8"
-            variants={itemVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
           >
-            <div className="flex items-start gap-4 mb-6">
-              <User className="w-8 h-8 text-primary" />
-              <div>
-                <h3 className="text-2xl font-bold text-base-content mb-2">
-                  {profile?.full_name || 'Full Stack Developer'}
-                </h3>
-                <p className="text-base-content/70 font-medium">
-                  {profile?.title || 'Web Developer'}
-                </p>
+            <div className="relative">
+              <div className="aspect-square rounded-2xl overflow-hidden bg-base-200">
+                {(() => {
+                  const imageUrl = profile?.about_image?.url || profile?.avatar_url;
+                  const imageAlt = profile?.about_image?.alt_text || profile?.full_name || 'Profile';
+                  
+                  if (imageUrl) {
+                    return (
+                      <img 
+                        src={imageUrl} 
+                        alt={imageAlt}
+                        className="w-full h-full object-cover"
+                        onError={(e) => e.target.style.display = 'none'}
+                      />
+                    );
+                  }
+                  
+                  return (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="w-32 h-32 text-base-content/20" />
+                    </div>
+                  );
+                })()}
+              </div>
+              
+              {/* Floating Stats Card */}
+              <div className="absolute -bottom-8 -right-8 bg-base-100 rounded-xl shadow-xl p-6 border border-base-300">
+                <div className="text-3xl font-bold text-primary mb-1">5+</div>
+                <div className="text-sm text-base-content/70">Years of Experience</div>
               </div>
             </div>
-            <p className="text-base-content/80 leading-relaxed text-lg">
-              {profile?.bio || profile?.hero_description || 'Passionate developer with expertise in modern web technologies, creating innovative solutions that make a difference.'}
+          </motion.div>
+
+          {/* Right Column - Content */}
+          <motion.div
+            className="flex flex-col justify-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <h3 className="text-3xl font-bold text-base-content mb-2">
+              {profile?.full_name || 'Full Stack Developer'}
+            </h3>
+            <p className="text-xl text-primary font-medium mb-6">
+              {profile?.title || 'Web Developer'}
             </p>
             
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 mt-6">
+            <p className="text-base-content/80 text-lg leading-relaxed mb-8">
+              {profile?.bio || profile?.hero_description || 'I specialize in building modern web applications with clean code and intuitive user interfaces. With a strong foundation in both frontend and backend development, I create solutions that are not only functional but also scalable and maintainable.'}
+            </p>
+
+            {/* Contact Info */}
+            <div className="space-y-3 mb-8">
+              {profile?.location && (
+                <div className="flex items-center gap-3 text-base-content/70">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  <span>{profile.location}</span>
+                </div>
+              )}
+              {profile?.email && (
+                <div className="flex items-center gap-3 text-base-content/70">
+                  <Mail className="w-5 h-5 text-primary" />
+                  <a href={`mailto:${profile.email}`} className="hover:text-primary transition-colors">
+                    {profile.email}
+                  </a>
+                </div>
+              )}
+              {profile?.phone && (
+                <div className="flex items-center gap-3 text-base-content/70">
+                  <Phone className="w-5 h-5 text-primary" />
+                  <a href={`tel:${profile.phone}`} className="hover:text-primary transition-colors">
+                    {profile.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* CTA Button */}
+            <div className="flex gap-4">
               <button 
                 onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn btn-gradient btn-md shadow-lg hover:shadow-xl"
+                className="btn btn-primary"
               >
                 Get In Touch
+                <ArrowRight className="w-4 h-4 ml-2" />
               </button>
               
               {profile?.resume_url && (
@@ -145,144 +198,90 @@ const About = () => {
                   href={profile.resume_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-outline btn-md"
+                  className="btn btn-outline"
                 >
                   Download CV
                 </a>
               )}
             </div>
           </motion.div>
+        </div>
 
-          {/* Image Card */}
-          <motion.div
-            className="glass-card rounded-3xl overflow-hidden aspect-square"
-            variants={itemVariants}
-          >
-            {(() => {
-              const imageUrl = profile?.about_image?.url || profile?.avatar_url;
-              const imageAlt = profile?.about_image?.alt_text || profile?.full_name || 'Profile Image';
-              
-              if (imageUrl) {
-                return (
-                  <div className="relative w-full h-full">
-                    <img 
-                      src={imageUrl} 
-                      alt={imageAlt}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.error('Error loading about image:', imageUrl);
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    <div className="absolute bottom-6 left-6 right-6">
-                      <div className="glass-card rounded-xl p-3 dark:bg-base-100/20 dark:backdrop-blur-lg">
-                        <div className="text-white font-semibold dark:text-base-content">Professional Developer</div>
-                        <div className="text-white/80 text-sm dark:text-base-content/80">Passionate & Dedicated</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-              
-              return (
-                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <User className="w-32 h-32 text-primary/50" />
-                </div>
-              );
-            })()}
-          </motion.div>
-
-          {/* Location Card */}
-          {profile?.location && (
-            <motion.div
-              className="glass-card rounded-3xl p-6 flex flex-col justify-between"
-              variants={itemVariants}
-            >
-              <MapPin className="w-6 h-6 text-primary mb-4" />
-              <div>
-                <div className="text-sm text-base-content/60 mb-1">Based in</div>
-                <div className="text-xl font-bold text-base-content">{profile.location}</div>
+        {/* Stats Section */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 xl:gap-12 mb-20 py-12 border-y border-base-300"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeInUp}
+        >
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
+                {stat.number}
               </div>
-            </motion.div>
-          )}
-
-          {/* Title Card */}
-          <motion.div
-            className="glass-card rounded-3xl p-6 flex flex-col justify-between"
-            variants={itemVariants}
-          >
-            <Award className="w-6 h-6 text-secondary mb-4" />
-            <div>
-              <div className="text-sm text-base-content/60 mb-1">Role</div>
-              <div className="text-xl font-bold text-base-content">
-                {profile?.title || 'Full Stack Developer'}
+              <div className="text-base-content/70">
+                {stat.label}
               </div>
             </div>
-          </motion.div>
-
-          {/* Email Card */}
-          {profile?.email && (
-            <motion.div
-              className="glass-card rounded-3xl p-6 flex flex-col justify-between"
-              variants={itemVariants}
-            >
-              <Mail className="w-6 h-6 text-accent mb-4" />
-              <div>
-                <div className="text-sm text-base-content/60 mb-1">Email</div>
-                <a 
-                  href={`mailto:${profile.email}`}
-                  className="text-lg font-semibold text-base-content hover:text-primary transition-colors break-all"
-                >
-                  {profile.email}
-                </a>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Values & Approach Highlight Card - Spans 2 columns */}
-          <motion.div
-            className="lg:col-span-2 glass-card rounded-3xl p-8"
-            variants={itemVariants}
-          >
-            <div className="grid grid-cols-3 gap-8">
-              <div className="text-center">
-                <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
-                <div className="text-3xl font-bold gradient-text mb-1">Passionate</div>
-                <div className="text-sm text-base-content/60">About Code</div>
-              </div>
-              <div className="text-center">
-                <Target className="w-8 h-8 text-secondary mx-auto mb-3" />
-                <div className="text-3xl font-bold gradient-text mb-1">Focused</div>
-                <div className="text-sm text-base-content/60">On Quality</div>
-              </div>
-              <div className="text-center">
-                <Rocket className="w-8 h-8 text-accent mx-auto mb-3" />
-                <div className="text-3xl font-bold gradient-text mb-1">Innovative</div>
-                <div className="text-sm text-base-content/60">Solutions</div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phone Card */}
-          {profile?.phone && (
-            <motion.div
-              className="glass-card rounded-3xl p-6 flex flex-col justify-between"
-              variants={itemVariants}
-            >
-              <Phone className="w-6 h-6 text-success mb-4" />
-              <div>
-                <div className="text-sm text-base-content/60 mb-1">Phone</div>
-                <a 
-                  href={`tel:${profile.phone}`}
-                  className="text-lg font-semibold text-base-content hover:text-primary transition-colors"
-                >
-                  {profile.phone}
-                </a>
-              </div>
-            </motion.div>
-          )}
+          ))}
         </motion.div>
+
+        {/* Skills & Expertise */}
+        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24">
+          {/* Skills */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <h4 className="text-2xl font-bold text-base-content mb-6">Personal Interests</h4>
+            <div className="flex flex-wrap gap-3">
+              {skills.map((skill, index) => (
+                <span 
+                  key={index}
+                  className="px-4 py-2 bg-base-200 text-base-content rounded-lg font-medium hover:bg-base-300 transition-colors"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* What I Do */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <h4 className="text-2xl font-bold text-base-content mb-6">What I Do</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                <div>
+                  <div className="font-semibold text-base-content mb-1">Web Development</div>
+                  <div className="text-base-content/70 text-sm">Building responsive and performant web applications</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                <div>
+                  <div className="font-semibold text-base-content mb-1">UI/UX Design</div>
+                  <div className="text-base-content/70 text-sm">Creating intuitive and beautiful user interfaces</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                <div>
+                  <div className="font-semibold text-base-content mb-1">API Development</div>
+                  <div className="text-base-content/70 text-sm">Designing and implementing robust backend systems</div>
+                </div>
+              </li>
+            </ul>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -84,7 +84,7 @@ const Contact = () => {
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/10 rounded-full mesh-blob"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 relative z-10">
         <div className={`text-center mb-16 transition-all duration-1000 ${
           hasIntersected ? 'animate-fade-in' : 'opacity-0'
         }`}>
@@ -96,7 +96,7 @@ const Contact = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-8 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 w-full">
           {/* Contact Information */}
           <motion.div 
             className="lg:col-span-2 space-y-6"

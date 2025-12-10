@@ -39,7 +39,7 @@ const Navbar = () => {
         ? 'navbar-blur shadow-lg'
         : 'bg-base-100/80 backdrop-blur-sm'
     }`}>
-      <div className="container mx-auto px-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <button
