@@ -86,7 +86,7 @@ const Hero = () => {
         <div className="flex flex-col xl:grid xl:grid-cols-2 xl:gap-20 2xl:gap-24 items-center min-h-screen py-12 xl:py-20">
           {/* Right Image - Large Rectangle */}
           <motion.div
-            className="relative order-1 xl:order-2 xl:ml-4 mt-4 xl:mt-0"
+            className="relative order-1 xl:order-2 xl:ml-4 mt-14 xl:mt-0"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
