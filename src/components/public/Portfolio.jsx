@@ -298,14 +298,15 @@ const Portfolio = () => {
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}
-                className="group glass-card rounded-3xl shadow-xl overflow-hidden hover-lift"
+                className="group glass-card rounded-3xl shadow-xl overflow-hidden hover-lift cursor-pointer"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                style={{ 
+                style={{
                   gridRow: index % 3 === 0 ? 'span 2' : 'span 1'
                 }}
+                onClick={() => setSelectedProject(project)}
               >
                 {/* Project Image */}
                 <div className="relative overflow-hidden" style={{ height: index % 3 === 0 ? '400px' : '250px' }}>
@@ -333,7 +334,7 @@ const Portfolio = () => {
                   {/* Action Buttons */}
                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
-                      onClick={() => setSelectedProject(project)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedProject(project); }}
                       className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform"
                       title="View Details"
                     >
@@ -347,6 +348,7 @@ const Portfolio = () => {
                         rel="noopener noreferrer"
                         className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform"
                         title="Live Demo"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="w-5 h-5 text-white" />
                       </a>
@@ -359,6 +361,7 @@ const Portfolio = () => {
                         rel="noopener noreferrer"
                         className="w-10 h-10 glass-card rounded-xl flex items-center justify-center hover:scale-110 transition-transform"
                         title="View Code"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Github className="w-5 h-5 text-white" />
                       </a>

@@ -105,11 +105,16 @@ const Hero = () => {
               />
 
               {/* Main Image Container */}
+<<<<<<< HEAD
               <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-w-sm mx-auto">
+=======
+ <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] w-full max-w-md xl:max-w-lg 2xl:max-w-xl mx-auto">
+>>>>>>> 6c736b0 (Aj)
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10"></div>
 
                 {(profile?.hero_image?.url || profile?.avatar_url) ? (
+<<<<<<< HEAD
                   <div className="w-full h-full overflow-hidden">
                     <img
                       src={profile.hero_image?.url || profile.avatar_url}
@@ -125,6 +130,17 @@ const Hero = () => {
                       }}
                     />
                   </div>
+=======
+                  <img
+                    src={profile.hero_image?.url || profile.avatar_url}
+                    alt={profile.hero_image?.alt_text || profile.full_name || 'Profile Image'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Error loading hero image:', profile.hero_image?.url || profile.avatar_url);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+>>>>>>> 6c736b0 (Aj)
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
                     <div className="text-center text-white">
@@ -159,7 +175,7 @@ const Hero = () => {
 
           {/* Left Content */}
           <motion.div
-            className="space-y-8 order-2 xl:order-1"
+            className="space-y-8 order-2 xl:order-1 xl:mt-12"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}

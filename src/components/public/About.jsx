@@ -46,7 +46,7 @@ const About = () => {
   if (loading) {
     return (
       <div className="py-20">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="text-center">
             <div className="loading loading-spinner loading-lg text-primary"></div>
           </div>
@@ -81,6 +81,7 @@ const About = () => {
       ref={elementRef}
       className="py-20 md:py-32 bg-base-100 relative overflow-hidden"
     >
+<<<<<<< HEAD
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full mesh-blob"></div>
@@ -88,6 +89,9 @@ const About = () => {
       </div>
 
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 relative z-10">
+=======
+      <div className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+>>>>>>> 6c736b0 (Aj)
         {/* Section Header */}
         <motion.div 
           className="mb-16"
@@ -103,7 +107,11 @@ const About = () => {
         </motion.div>
 
         {/* Main Content */}
+<<<<<<< HEAD
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 2xl:gap-24 mb-16 lg:mb-20">
+=======
+        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24 items-center mb-20">
+>>>>>>> 6c736b0 (Aj)
           {/* Left Column - Image */}
           <motion.div
             initial="hidden"
@@ -112,7 +120,7 @@ const About = () => {
             variants={fadeInUp}
           >
             <div className="relative">
-              <div className="aspect-square rounded-2xl overflow-hidden bg-base-200">
+              <div className="aspect-[2/1] rounded-2xl overflow-hidden bg-base-200 w-full max-w-2xl mx-auto shadow-xl">
                 {(() => {
                   const imageUrl = profile?.about_image?.url || profile?.avatar_url;
                   const imageAlt = profile?.about_image?.alt_text || profile?.full_name || 'Profile';
@@ -137,7 +145,7 @@ const About = () => {
               </div>
               
               {/* Floating Stats Card */}
-              <div className="absolute -bottom-8 -right-8 bg-base-100 rounded-xl shadow-xl p-6 border border-base-300">
+              <div className="absolute -bottom-6 -right-6 bg-base-100 rounded-xl shadow-xl p-6 border border-base-300">
                 <div className="text-3xl font-bold text-primary mb-1">5+</div>
                 <div className="text-sm text-base-content/70">Years of Experience</div>
               </div>
@@ -190,7 +198,7 @@ const About = () => {
             </div>
 
             {/* CTA Button */}
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <button 
                 onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn btn-primary"
@@ -215,7 +223,11 @@ const About = () => {
 
         {/* Stats Section */}
         <motion.div
+<<<<<<< HEAD
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 xl:gap-12 mb-16 lg:mb-20 py-8 lg:py-12 border-y border-base-300/50"
+=======
+          className="grid grid-cols-2 md:grid-cols-3 gap-8 xl:gap-16 mb-20 py-12 border-y border-base-300"
+>>>>>>> 6c736b0 (Aj)
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
