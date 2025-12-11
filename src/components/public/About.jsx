@@ -65,7 +65,6 @@ const About = () => {
   };
 
   const stats = [
-    { number: '5+', label: 'Years Experience' },
     { number: '50+', label: 'Projects Completed' },
     { number: '30+', label: 'Happy Clients' },
   ];
@@ -130,11 +129,6 @@ const About = () => {
                 })()}
               </div>
               
-              {/* Floating Stats Card */}
-              <div className="absolute -bottom-6 -right-6 bg-base-100 rounded-xl shadow-xl p-6 border border-base-300">
-                <div className="text-3xl font-bold text-primary mb-1">5+</div>
-                <div className="text-sm text-base-content/70">Years of Experience</div>
-              </div>
             </div>
           </motion.div>
 

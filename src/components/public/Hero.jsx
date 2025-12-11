@@ -83,10 +83,10 @@ const Hero = () => {
       </div>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10">
-        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24 items-center min-h-screen py-20">
+        <div className="flex flex-col xl:grid xl:grid-cols-2 xl:gap-20 2xl:gap-24 items-center min-h-screen py-12 xl:py-20">
           {/* Right Image - Large Rectangle */}
           <motion.div
-            className="relative order-1 xl:order-2 xl:ml-4"
+            className="relative order-1 xl:order-2 xl:ml-4 mt-4 xl:mt-0"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -134,15 +134,15 @@ const Hero = () => {
 
                 {/* Floating Badge */}
                 <motion.div
-                  className="absolute bottom-6 left-6 right-6 glass-card rounded-2xl p-4 z-20 dark:bg-base-100/20 dark:backdrop-blur-lg"
+                  className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 glass-card rounded-2xl p-3 sm:p-4 z-20 dark:bg-base-100/20 dark:backdrop-blur-lg"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1 }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-black/80 dark:text-base-content/80">Currently working on</div>
-                      <div className="font-semibold text-black dark:text-base-content">Innovative Projects</div>
+                      <div className="text-xs sm:text-sm text-black/80 dark:text-white/80">Currently working on</div>
+                      <div className="text-sm sm:text-base font-semibold text-black dark:text-white">Innovative Projects</div>
                     </div>
                     <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse dark:bg-green-500"></div>
                   </div>
@@ -153,15 +153,15 @@ const Hero = () => {
 
           {/* Left Content */}
           <motion.div
-            className="space-y-8 order-2 xl:order-1 xl:mt-12"
+            className="space-y-6 xl:space-y-8 order-2 xl:order-1 xl:mt-12 w-full"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             {/* Main Heading */}
-            <div className="space-y-4">
+            <div className="space-y-3 xl:space-y-4">
               <motion.h1
-                className="text-display gradient-text"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold gradient-text"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
@@ -170,7 +170,7 @@ const Hero = () => {
               </motion.h1>
 
               <motion.h2
-                className="text-heading text-base-content/90"
+                className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl text-base-content/90"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
@@ -180,17 +180,17 @@ const Hero = () => {
 
               {/* Badge - Moved closer to subtitle */}
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 glass-card rounded-full"
+                className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 glass-card rounded-full"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
               >
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-base-content/80">Available for new projects</span>
+                <span className="text-xs sm:text-sm font-medium text-base-content/80">Available for new projects</span>
               </motion.div>
 
               <motion.p
-                className="text-body-lg text-base-content/70 max-w-2xl xl:max-w-3xl leading-relaxed hidden sm:block"
+                className="text-base sm:text-lg text-base-content/70 max-w-2xl xl:max-w-3xl leading-relaxed hidden sm:block"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
@@ -201,17 +201,17 @@ const Hero = () => {
 
             {/* Action Buttons */}
             <motion.div
-              className="flex flex-wrap gap-4"
+              className="flex flex-wrap gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
               <button
                 onClick={() => document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn btn-gradient btn-lg group shadow-xl hover:shadow-2xl"
+                className="btn btn-gradient btn-md sm:btn-lg group shadow-xl hover:shadow-2xl"
               >
                 View My Work
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
               </button>
 
               {profile?.resume_url && (
@@ -219,9 +219,9 @@ const Hero = () => {
                   href={profile.resume_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-outline btn-lg glass-card hover:glass-card"
+                  className="btn btn-outline btn-md sm:btn-lg glass-card hover:glass-card"
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   Download Resume
                 </a>
               )}
@@ -229,7 +229,7 @@ const Hero = () => {
 
             {/* Social Links */}
             <motion.div
-              className="flex gap-4"
+              className="flex gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
@@ -239,9 +239,9 @@ const Hero = () => {
                   href={profile.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
+                  className="w-10 h-10 sm:w-12 sm:h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
-                  <Github className="w-5 h-5 group-hover:scale-110 transition-transform text-base-content" />
+                  <Github className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform text-base-content" />
                 </a>
               )}
 
@@ -250,18 +250,18 @@ const Hero = () => {
                   href={profile.linkedin_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
+                  className="w-10 h-10 sm:w-12 sm:h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
-                  <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform text-base-content" />
+                  <Linkedin className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform text-base-content" />
                 </a>
               )}
 
               {profile?.email && (
                 <a
                   href={`mailto:${profile.email}`}
-                  className="w-12 h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
+                  className="w-10 h-10 sm:w-12 sm:h-12 glass-card rounded-xl flex items-center justify-center hover-lift group"
                 >
-                  <Mail className="w-5 h-5 group-hover:scale-110 transition-transform text-base-content" />
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform text-base-content" />
                 </a>
               )}
             </motion.div>
@@ -269,18 +269,18 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll Indicator - Centered on Mobile */}
       <motion.button 
         onClick={scrollToAbout}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer"
+        className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-20"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 0.7 }}
       >
         <div className="flex flex-col items-center gap-2">
-          <span className="text-sm text-base-content/60">Scroll Down</span>
-          <ChevronDown className="w-6 h-6 text-base-content/60" />
+          <span className="text-xs sm:text-sm text-base-content/60">Scroll Down</span>
+          <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-base-content/60" />
         </div>
       </motion.button>
     </section>
