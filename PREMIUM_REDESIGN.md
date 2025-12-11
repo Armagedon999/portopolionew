@@ -46,7 +46,7 @@ This portfolio has been completely redesigned with a premium, professional aesth
 - Smooth hover lift animations
 - Gradient overlay on images
 - Premium modal with backdrop blur
-
+sa
 ### 6. **Contact Section**
 - Glassmorphic form and info cards
 - Gradient icon backgrounds
