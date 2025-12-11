@@ -83,7 +83,7 @@ const Hero = () => {
       </div>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10">
-        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24 items-center min-h-screen py-20 xl:py-32">
+        <div className="grid xl:grid-cols-2 gap-16 xl:gap-20 2xl:gap-24 items-center min-h-screen py-20">
           {/* Right Image - Large Rectangle */}
           <motion.div
             className="relative order-1 xl:order-2 xl:ml-4"
@@ -105,32 +105,11 @@ const Hero = () => {
               />
 
               {/* Main Image Container */}
-<<<<<<< HEAD
-              <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-w-sm mx-auto">
-=======
  <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] w-full max-w-md xl:max-w-lg 2xl:max-w-xl mx-auto">
->>>>>>> 6c736b0 (Aj)
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10"></div>
 
                 {(profile?.hero_image?.url || profile?.avatar_url) ? (
-<<<<<<< HEAD
-                  <div className="w-full h-full overflow-hidden">
-                    <img
-                      src={profile.hero_image?.url || profile.avatar_url}
-                      alt={profile.hero_image?.alt_text || profile.full_name || 'Profile Image'}
-                      className="w-full h-full object-cover"
-                      style={{ 
-                        objectPosition: '60% center',
-                        transform: 'scale(1.05)'
-                      }}
-                      onError={(e) => {
-                        console.error('Error loading hero image:', profile.hero_image?.url || profile.avatar_url);
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </div>
-=======
                   <img
                     src={profile.hero_image?.url || profile.avatar_url}
                     alt={profile.hero_image?.alt_text || profile.full_name || 'Profile Image'}
@@ -140,7 +119,6 @@ const Hero = () => {
                       e.target.style.display = 'none';
                     }}
                   />
->>>>>>> 6c736b0 (Aj)
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
                     <div className="text-center text-white">
@@ -222,31 +200,30 @@ const Hero = () => {
             </div>
 
             {/* Action Buttons */}
-            <motion.div 
+            <motion.div
               className="flex flex-wrap gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              {profile?.resume_url ? (
+              <button
+                onClick={() => document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })}
+                className="btn btn-gradient btn-lg group shadow-xl hover:shadow-2xl"
+              >
+                View My Work
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {profile?.resume_url && (
                 <a
                   href={profile.resume_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  download="CV_Resume.pdf"
-                  className="btn btn-gradient btn-lg group shadow-xl hover:shadow-2xl"
+                  className="btn btn-outline btn-lg glass-card hover:glass-card"
                 >
-                  <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  Download CV
+                  <Download className="w-5 h-5" />
+                  Download Resume
                 </a>
-              ) : (
-                <button
-                  onClick={() => document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="btn btn-gradient btn-lg group shadow-xl hover:shadow-2xl"
-                >
-                  <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  Download CV
-                </button>
               )}
             </motion.div>
 

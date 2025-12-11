@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Save, User, Mail, MapPin, Phone, Github, Linkedin, Globe, FileText, Image as ImageIcon, Upload, Download, Trash2 } from 'lucide-react';
-import { db, storage } from '../../lib/supabase';
+import { Save, User, Mail, MapPin, Phone, Github, Linkedin, Globe, FileText, Image as ImageIcon } from 'lucide-react';
+import { db } from '../../lib/supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import toast from 'react-hot-toast';
 
@@ -24,9 +24,6 @@ const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [cvFile, setCvFile] = useState(null);
-  const [uploadingCv, setUploadingCv] = useState(false);
-  const [cvPreview, setCvPreview] = useState(null);
 
   useEffect(() => {
     loadProfile();
@@ -131,142 +128,19 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setUploadingCv(true);
 
     try {
-      let resumeUrl = profile.resume_url;
-
-      // If a new CV file is selected, upload it to Supabase storage
-      if (cvFile) {
-        const fileExt = cvFile.name.split('.').pop();
-        const fileName = `resume_${Date.now()}.${fileExt}`;
-        const filePath = `resumes/${fileName}`;
-
-        // Upload file to Supabase storage
-        const { data: uploadData, error: uploadError } = await storage.uploadFile('images', filePath, cvFile);
-        
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        // Get public URL
-        resumeUrl = storage.getPublicUrl('images', filePath);
-
-        // If there's an old CV, delete it from storage
-        if (profileData?.resume_url && profileData.resume_url.includes('supabase')) {
-          try {
-            let oldPath = null;
-            if (profileData.resume_url.includes('/storage/v1/object/public/images/')) {
-              const urlParts = profileData.resume_url.split('/storage/v1/object/public/images/');
-              if (urlParts.length > 1) {
-                oldPath = urlParts[1].split('?')[0];
-              }
-            } else if (profileData.resume_url.includes('/storage/v1/object/sign/images/')) {
-              const urlParts = profileData.resume_url.split('/storage/v1/object/sign/images/');
-              if (urlParts.length > 1) {
-                oldPath = urlParts[1].split('?')[0].split('&')[0];
-              }
-            }
-            
-            if (oldPath) {
-              await storage.deleteFile('images', oldPath);
-            }
-          } catch (deleteError) {
-            console.warn('Error deleting old CV:', deleteError);
-          }
-        }
-      }
-
-      // Update profile with new resume URL
-      const profileToUpdate = {
-        ...profile,
-        resume_url: resumeUrl || profile.resume_url
-      };
-
-      const { error } = await db.updateProfile(profileToUpdate);
+      const { error } = await db.updateProfile(profile);
       if (error) throw error;
       
       toast.success('Profile updated successfully!');
       // Reload profile data to get updated images
       await loadProfile();
-      setCvFile(null);
-      setCvPreview(null);
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error(`Failed to update profile: ${error.message || 'Please try again.'}`);
+      toast.error('Failed to update profile');
     } finally {
       setSaving(false);
-      setUploadingCv(false);
-    }
-  };
-
-  const handleCvFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type (PDF, DOC, DOCX)
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please select a PDF or Word document');
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
-        return;
-      }
-
-      setCvFile(file);
-      setCvPreview(file.name);
-    }
-  };
-
-  const handleDeleteCv = async () => {
-    if (!profile.resume_url) {
-      toast.error('No CV to delete');
-      return;
-    }
-
-    // Confirm deletion
-    if (!confirm('Are you sure you want to delete your CV? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      // Delete file from Supabase storage
-      if (profile.resume_url.includes('supabase')) {
-        let filePath = null;
-        if (profile.resume_url.includes('/storage/v1/object/public/images/')) {
-          const urlParts = profile.resume_url.split('/storage/v1/object/public/images/');
-          if (urlParts.length > 1) {
-            filePath = urlParts[1].split('?')[0];
-          }
-        } else if (profile.resume_url.includes('/storage/v1/object/sign/images/')) {
-          const urlParts = profile.resume_url.split('/storage/v1/object/sign/images/');
-          if (urlParts.length > 1) {
-            filePath = urlParts[1].split('?')[0].split('&')[0];
-          }
-        }
-
-        if (filePath) {
-          await storage.deleteFile('images', filePath);
-        }
-      }
-
-      // Update profile to remove resume_url
-      const { error } = await db.updateProfile({
-        ...profile,
-        resume_url: ''
-      });
-
-      if (error) throw error;
-
-      toast.success('CV deleted successfully!');
-      // Reload profile data
-      await loadProfile();
-    } catch (error) {
-      console.error('Error deleting CV:', error);
-      toast.error(`Failed to delete CV: ${error.message || 'Please try again.'}`);
     }
   };
 
@@ -465,83 +339,16 @@ const Profile = () => {
                 <label className="label">
                   <span className="label-text font-semibold flex items-center">
                     <FileText className="w-4 h-4 mr-2" />
-                    Resume/CV
+                    Resume/CV URL
                   </span>
                 </label>
                 <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleCvFileChange}
-                  className="file-input file-input-bordered w-full"
+                  type="url"
+                  value={profile.resume_url}
+                  onChange={(e) => handleChange('resume_url', e.target.value)}
+                  className="input input-bordered w-full"
+                  placeholder="https://example.com/resume.pdf"
                 />
-                <p className="text-xs text-base-content/60 mt-2">
-                  Upload your CV/Resume (PDF or Word document, max 5MB)
-                </p>
-                
-                {/* Current CV Preview */}
-                {profile.resume_url && !cvFile && (
-                  <div className="mt-4 p-3 bg-base-200 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="text-sm font-medium text-base-content">Current CV</p>
-                        <a
-                          href={profile.resume_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary hover:underline"
-                        >
-                          {profile.resume_url.split('/').pop() || 'View CV'}
-                        </a>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <a
-                        href={profile.resume_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download="CV_Resume.pdf"
-                        className="btn btn-sm btn-outline"
-                        title="Download CV"
-                      >
-                        <Download className="w-4 h-4" />
-                      </a>
-                      <button
-                        onClick={handleDeleteCv}
-                        className="btn btn-sm btn-error"
-                        title="Delete CV"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* New CV Preview */}
-                {cvPreview && (
-                  <div className="mt-4 p-3 bg-info/10 rounded-lg flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-info" />
-                    <div>
-                      <p className="text-sm font-medium text-base-content">New CV: {cvPreview}</p>
-                      <p className="text-xs text-base-content/60">Will replace current CV after saving</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Fallback: Manual URL input (optional) */}
-                <div className="mt-4">
-                  <label className="label">
-                    <span className="label-text text-xs">Or enter CV URL manually (optional)</span>
-                  </label>
-                  <input
-                    type="url"
-                    value={profile.resume_url}
-                    onChange={(e) => handleChange('resume_url', e.target.value)}
-                    className="input input-bordered w-full input-sm"
-                    placeholder="https://example.com/resume.pdf"
-                    disabled={!!cvFile}
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -673,12 +480,12 @@ const Profile = () => {
             <button
               type="submit"
               className="btn btn-primary btn-lg"
-              disabled={saving || uploadingCv}
+              disabled={saving}
             >
-              {(saving || uploadingCv) ? (
+              {saving ? (
                 <>
                   <span className="loading loading-spinner loading-sm"></span>
-                  {uploadingCv ? 'Uploading CV...' : 'Saving...'}
+                  Saving...
                 </>
               ) : (
                 <>

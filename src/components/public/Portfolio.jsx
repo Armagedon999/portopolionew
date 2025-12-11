@@ -137,7 +137,7 @@ const Portfolio = () => {
               </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8 xl:gap-10 w-full">
               {projects.filter(p => p.is_featured).slice(0, 3).map((project, index) => (
                 <motion.div
                   key={`featured-${project.id}`}
@@ -294,7 +294,7 @@ const Portfolio = () => {
             <p className="text-lg text-base-content/50">No projects found for the selected filter.</p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8 xl:gap-10 w-full">
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}
