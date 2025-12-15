@@ -132,9 +132,9 @@ const Hero = () => {
                   </div>
                 )}
 
-                {/* Floating Badge - Smaller on mobile */}
+                {/* Floating Badge - Smaller on mobile, moved up */}
                 <motion.div
-                  className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4 md:bottom-6 md:left-6 md:right-6 glass-card rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 z-20 dark:bg-base-100/20 dark:backdrop-blur-lg"
+                  className="absolute bottom-12 left-2 right-2 sm:bottom-16 sm:left-4 sm:right-4 md:bottom-20 md:left-6 md:right-6 xl:bottom-24 xl:left-6 xl:right-6 glass-card rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 z-20 dark:bg-base-100/20 dark:backdrop-blur-lg"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1 }}
