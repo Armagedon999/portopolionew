@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Save, User, Mail, MapPin, Phone, Github, Linkedin, Globe, FileText, Image as ImageIcon } from 'lucide-react';
-import { db } from '../../lib/supabase';
+import { Save, User, Mail, MapPin, Phone, Github, Linkedin, Globe, FileText, Image as ImageIcon, Upload, X } from 'lucide-react';
+import { db, storage } from '../../lib/supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import toast from 'react-hot-toast';
 
@@ -24,6 +24,8 @@ const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingCV, setUploadingCV] = useState(false);
+  const [cvFile, setCvFile] = useState(null);
 
   useEffect(() => {
     loadProfile();
@@ -146,6 +148,118 @@ const Profile = () => {
 
   const handleChange = (field, value) => {
     setProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCVFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload a PDF or Word document (.pdf, .doc, .docx)');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    setCvFile(file);
+  };
+
+  const handleCVUpload = async () => {
+    if (!cvFile) {
+      toast.error('Please select a file to upload');
+      return;
+    }
+
+    setUploadingCV(true);
+    try {
+      // Generate unique filename
+      const fileExt = cvFile.name.split('.').pop();
+      const fileName = `cv_${Date.now()}.${fileExt}`;
+      const filePath = `resumes/${fileName}`;
+
+      // Upload file to Supabase storage
+      const { data: uploadData, error: uploadError } = await storage.uploadFile('portfolio-files', filePath, cvFile);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const publicUrl = storage.getPublicUrl('portfolio-files', filePath);
+
+      // Update profile with new CV URL
+      const updatedProfile = { ...profile, resume_url: publicUrl };
+      const { error: updateError } = await db.updateProfile(updatedProfile);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setProfile(updatedProfile);
+      setCvFile(null);
+      toast.success('CV uploaded successfully!');
+      
+      // Reset file input
+      const fileInput = document.getElementById('cv-file-input');
+      if (fileInput) fileInput.value = '';
+    } catch (error) {
+      console.error('Error uploading CV:', error);
+      toast.error(`Failed to upload CV: ${error.message || 'Unknown error'}`);
+    } finally {
+      setUploadingCV(false);
+    }
+  };
+
+  const handleRemoveCV = async () => {
+    if (!profile.resume_url) return;
+
+    try {
+      // Extract file path from Supabase storage URL
+      // URL format: https://[project].supabase.co/storage/v1/object/public/cv/resumes/filename.pdf
+      try {
+        const url = new URL(profile.resume_url);
+        const pathParts = url.pathname.split('/').filter(part => part);
+        
+        // Find index of 'public' and get path after it (should be portfolio-files/resumes/filename.pdf)
+        const publicIndex = pathParts.findIndex(part => part === 'public');
+        if (publicIndex !== -1 && publicIndex < pathParts.length - 1) {
+          // Get path after 'public' (skip 'portfolio-files' bucket name, get the rest)
+          const pathAfterPublic = pathParts.slice(publicIndex + 1);
+          if (pathAfterPublic.length > 1) {
+            // Remove 'portfolio-files' bucket name, keep the rest (resumes/filename.pdf)
+            const filePath = pathAfterPublic.slice(1).join('/');
+            
+            // Delete file from storage
+            const { error: deleteError } = await storage.deleteFile('portfolio-files', filePath);
+            if (deleteError) {
+              console.warn('Error deleting file from storage:', deleteError);
+              // Continue to remove URL from profile even if file deletion fails
+            }
+          }
+        }
+      } catch (urlError) {
+        console.warn('Could not parse CV URL for deletion:', urlError);
+        // Continue to remove URL from profile even if we can't parse the URL
+      }
+
+      // Update profile to remove CV URL
+      const updatedProfile = { ...profile, resume_url: '' };
+      const { error } = await db.updateProfile(updatedProfile);
+
+      if (error) throw error;
+
+      setProfile(updatedProfile);
+      toast.success('CV removed successfully!');
+    } catch (error) {
+      console.error('Error removing CV:', error);
+      toast.error(`Failed to remove CV: ${error.message || 'Unknown error'}`);
+    }
   };
 
   if (loading) {
@@ -339,16 +453,89 @@ const Profile = () => {
                 <label className="label">
                   <span className="label-text font-semibold flex items-center">
                     <FileText className="w-4 h-4 mr-2" />
-                    Resume/CV URL
+                    Resume/CV
                   </span>
                 </label>
-                <input
-                  type="url"
-                  value={profile.resume_url}
-                  onChange={(e) => handleChange('resume_url', e.target.value)}
-                  className="input input-bordered w-full"
-                  placeholder="https://example.com/resume.pdf"
-                />
+                
+                {/* CV Upload Section */}
+                <div className="space-y-4">
+                  {/* File Upload Input */}
+                  <div className="flex gap-2">
+                    <label className="flex-1">
+                      <input
+                        id="cv-file-input"
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleCVFileChange}
+                        className="file-input file-input-bordered w-full"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleCVUpload}
+                      disabled={!cvFile || uploadingCV}
+                      className="btn btn-primary"
+                    >
+                      {uploadingCV ? (
+                        <>
+                          <span className="loading loading-spinner loading-sm"></span>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload CV
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Current CV Display */}
+                  {profile.resume_url && (
+                    <div className="p-4 bg-base-200 rounded-lg border border-base-300">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-primary" />
+                          <div>
+                            <p className="font-semibold text-sm">Current CV</p>
+                            <a
+                              href={profile.resume_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline break-all"
+                            >
+                              {profile.resume_url}
+                            </a>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveCV}
+                          className="btn btn-sm btn-ghost text-error"
+                          title="Remove CV"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Manual URL Input (Alternative) */}
+                  <div>
+                    <label className="label">
+                      <span className="label-text text-sm text-base-content/70">
+                        Or enter CV URL manually
+                      </span>
+                    </label>
+                    <input
+                      type="url"
+                      value={profile.resume_url}
+                      onChange={(e) => handleChange('resume_url', e.target.value)}
+                      className="input input-bordered w-full"
+                      placeholder="https://example.com/resume.pdf"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

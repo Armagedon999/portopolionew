@@ -285,7 +285,47 @@ GRANT SELECT ON public_projects TO public;
 GRANT SELECT ON public_images TO public;
 
 -- ==============================================
--- 8. CREATE UPDATED_AT TRIGGERS
+-- 8. CREATE STORAGE BUCKETS
+-- ==============================================
+
+-- Note: Assuming 'portfolio-files' bucket already exists
+-- If not, create it first in Supabase Dashboard or run:
+-- INSERT INTO storage.buckets (id, name, public)
+-- VALUES ('portfolio-files', 'portfolio-files', true)
+-- ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing CV bucket policies if they exist
+DROP POLICY IF EXISTS "CV files are publicly accessible" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload CV files" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can update CV files" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can delete CV files" ON storage.objects;
+
+-- Allow public access to CV files in portfolio-files bucket
+CREATE POLICY "CV files are publicly accessible"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'portfolio-files');
+
+-- Allow authenticated users to upload CV files
+CREATE POLICY "Authenticated users can upload CV files"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'portfolio-files');
+
+-- Allow authenticated users to update CV files
+CREATE POLICY "Authenticated users can update CV files"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (bucket_id = 'portfolio-files');
+
+-- Allow authenticated users to delete CV files
+CREATE POLICY "Authenticated users can delete CV files"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (bucket_id = 'portfolio-files');
+
+-- ==============================================
+-- 9. CREATE UPDATED_AT TRIGGERS
 -- ==============================================
 
 -- Function to update updated_at column
@@ -321,7 +361,7 @@ CREATE TRIGGER update_images_updated_at BEFORE UPDATE ON images
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ==============================================
--- 9. INSERT SAMPLE DATA
+-- 10. INSERT SAMPLE DATA
 -- ==============================================
 
 -- Insert sample images
@@ -403,7 +443,7 @@ INSERT INTO contacts (name, email, subject, message, is_read) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ==============================================
--- 10. VERIFICATION AND SUMMARY
+-- 11. VERIFICATION AND SUMMARY
 -- ==============================================
 
 -- Display completion message
