@@ -82,11 +82,11 @@ const Hero = () => {
         />
       </div>
 
-      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10 pt-20 sm:pt-24 md:pt-28">
-        <div className="flex flex-col xl:grid xl:grid-cols-2 xl:gap-20 2xl:gap-24 items-center min-h-[calc(100vh-5rem)] sm:min-h-[calc(100vh-6rem)] py-8 sm:py-12 xl:py-20">
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10">
+        <div className="flex flex-col xl:grid xl:grid-cols-2 xl:gap-20 2xl:gap-24 items-center min-h-screen py-8 sm:py-12 xl:py-20 pt-20 sm:pt-24 md:pt-28 xl:pt-20">
           {/* Right Image - Large Rectangle */}
           <motion.div
-            className="relative order-1 xl:order-2 xl:ml-4 mt-6 sm:mt-10 md:mt-14 xl:mt-0"
+            className="relative order-1 xl:order-2 xl:ml-4 mt-0 sm:mt-4 md:mt-6 xl:mt-0"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -273,7 +273,7 @@ const Hero = () => {
       {/* Scroll Indicator - Centered on Mobile */}
       <motion.button 
         onClick={scrollToAbout}
-        className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-20"
+        className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-0 right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 cursor-pointer z-20 mx-auto w-fit"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
         initial={{ opacity: 0 }}
